@@ -1,7 +1,27 @@
 package entities;
 
-public class Chef {
+import sharedRegions.*;
+
+public class Chef extends Thread {
     
-    //estado em que se encontra
+    //identify the chef
+    //the state the chef is in
+
+    public int chefState;
+
+    public Chef(){
+        //initial state
+        chefState = ChefStates.WAFOR;
+    }
+
+    public void setChefState(int state){
+        chefState = state;
+    }
+
+    public int getChefState(){
+        return chefState;
+    }
+
+    //fucntion run - thread 
     
 }
