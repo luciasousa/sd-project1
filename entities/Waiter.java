@@ -6,11 +6,13 @@ public class Waiter {
     //identify the waiter
     //the state the waiter is in
 
-    public int waiterState;
+    private int waiterState;
+    private Bar bar;
 
-    public Waiter(){
+    public Waiter(Bar bar){
         //initial state
         waiterState = WaiterStates.APPST;
+        this.bar = bar;
     }
 
     public void setWaiterState(int state){
@@ -22,4 +24,28 @@ public class Waiter {
     }
 
     //fucntion run - thread 
+    public void run() {
+
+        char c = bar.lookAround();
+
+        switch(c) {
+
+            case 'c':
+                bar.saluteTheClient();
+                bar.returnToBar();
+            
+            case 'o':
+                bar.getThePad();
+                bar.handTheNoteToChef();
+                bar.returnToBar();
+            
+            case 'p':
+                while(!bar.haveAllClientsBeenServed()) {
+                    bar.collectPortion();
+                    bar.deliverPortion();
+                }
+                bar.returnToBar();
+        }
+
+    }
 }

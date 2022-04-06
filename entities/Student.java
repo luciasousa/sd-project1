@@ -1,16 +1,23 @@
 package entities;
 
+import sharedRegions.Table;
+
 public class Student {
     
     //identify the student
     //id + the state the student is in
-    public int studentID;
-    public int studentState;
+    private int studentID;
+    private int studentState;
+    private boolean firstStudent;
+    private final Table table;
 
-    public Student(int studentID){
+
+    public Student(int studentID, Table table, boolean firstStudent){
         //initial state
         this.studentID = studentID;
         studentState = StudentStates.GGTRT;
+        this.table = table;
+        this.firstStudent = firstStudent;
     }
 
     public void setStudentID(int id){
@@ -30,4 +37,35 @@ public class Student {
     }
 
     //function run - thread
+    public void run() {
+
+        table.walkABit();
+
+        table.enter();
+
+        table.readMenu();
+
+        if (!firstStudent) table.informCompanion();
+
+        else {
+
+            table.prepareTheOrder();
+
+            while(!table.hasEverybodyChosen()) table.addUpOnesChoice();
+
+            table.callWaiter();
+
+            table.describeTheOrder();
+
+            table.joinTheTalk();
+        }
+
+        table.startEating();
+
+        table.endEating();
+
+        while(table.hasEverybodyFinished());
+        
+        table.signalTheWaiter();
+    }
 }

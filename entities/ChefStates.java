@@ -18,3 +18,16 @@ public class ChefStates {
     public static int CLSSV = 4;
     
 }
+
+/*public enum ChefStates {
+    WAITING_FOR_AN_ORDER("WAFOR"),
+    PREPARING_A_COURSE("PRPCS"),
+    DISHING_THE_PORTIONS("DSHPT"),
+    DELIVERING_THE_PORTIONS("DLVPT"),
+    CLOSING_SERVICE("CLSSV");
+
+    private ChefStates(String s) {
+        
+    }    
+}*/
+
