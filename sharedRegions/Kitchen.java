@@ -34,6 +34,8 @@ public class Kitchen {
 
     
     public synchronized void handTheNoteToChef(int numberOfCoursesToDeliver, int numberOfStudents) {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.PCODR);
         isNoteAvailable = true;
         this.numberOfCoursesToDeliver = numberOfCoursesToDeliver;
         this.numberOfPortionsToDeliver = numberOfStudents;
@@ -69,8 +71,8 @@ public class Kitchen {
     }
 
     public synchronized void collectPortion() {
-        //Waiter waiter = (Waiter) Thread.currentThread();
-        //waiter.setWaiterState(WaiterStates.WTFPT);
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.WTFPT);
     }
 
     public synchronized void continuePreparation() {

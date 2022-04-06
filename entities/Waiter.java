@@ -1,7 +1,7 @@
 package entities;
 import sharedRegions.*;
 
-public class Waiter {
+public class Waiter extends Thread{
 
     //identify the waiter
     //the state the waiter is in
@@ -9,6 +9,8 @@ public class Waiter {
     private int waiterState;
     private Bar bar;
     private Kitchen kitchen;
+    private int numberOfStudentsInRestaurant;
+    private int numberOfCoursesToDeliver;
 
     public Waiter(Bar bar, Kitchen kitchen){
         //initial state
@@ -28,11 +30,11 @@ public class Waiter {
     //fucntion run - thread 
     public void run() {
 
-        char c = bar.lookAround();
+        String s = bar.lookAround();
 
-        switch(c) {
+        switch(s) {
 
-            case 'c':
+            case "c": //client arriving
 
                 bar.saluteTheClient();
 
@@ -40,17 +42,17 @@ public class Waiter {
 
                 bar.lookAround();
             
-            case 'o':
+            case "o": //order ready to be collected
 
                 bar.getThePad();
 
-                kitchen.handTheNoteToChef(3,7);
+                kitchen.handTheNoteToChef(numberOfCoursesToDeliver, numberOfStudentsInRestaurant);
 
                 bar.returnToBar();
 
                 bar.lookAround();
             
-            case 'p':
+            case "p": //portion ready to be collected
 
                 while(!bar.haveAllClientsBeenServed()) {
 
@@ -64,7 +66,7 @@ public class Waiter {
 
                 bar.lookAround();
 
-            case 'b':
+            case "b": //bill presentation
 
                 bar.prepareTheBill();
 
@@ -74,7 +76,7 @@ public class Waiter {
 
                 bar.lookAround();
                 
-            case 'g':
+            case "g": //say goodbye to students
 
                 bar.sayGoodbye();
                 

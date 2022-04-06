@@ -13,32 +13,66 @@ public class Bar {
     private int numberOfPendingServiceRequests;
     //fila com os serviços pendentes
     private Queue<Request> pendingServiceRequests;
-    //número de estudantes no restaurant    e
+    //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
 
-    public void saluteTheClient() {}
+    public synchronized void saluteTheClient() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.PRSMN);
+        numberOfStudentsInRestaurant++;
+    }
 
-    public void returnToBar() {}
+    public synchronized void returnToBar() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.APPST);
+    }
 
-    public void getThePad() {}
-    
-    public char lookAround() {
-        return '0';
+    public synchronized void getThePad() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.TKODR);
+        
     }
     
-    public void deliverPortion() {}
+    public synchronized String lookAround() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        if(waiter.getWaiterState() != WaiterStates.APPST) {
+            waiter.setWaiterState(WaiterStates.APPST);
+        }
 
-    public boolean haveAllClientsBeenServed() {
+        while(numberOfPendingServiceRequests == 0) {
+            try {
+                wait();
+            } catch (Exception e) {
+                System.out.println("Thread interrupted");
+            }
+        }
+        Request request = pendingServiceRequests.poll();
+        return request.getRequestType();
+    }
+    
+    public synchronized void deliverPortion() {}
+
+    //possivelmente esta função será na Table
+    public synchronized boolean haveAllClientsBeenServed() {
         return false;
     }
 
-    public void prepareTheBill() {}
+    public synchronized void prepareTheBill() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.PRCBL);
+    }
 
-    public void presentTheBill() {}
+    public synchronized void presentTheBill() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.RECPM);
+    }
 
-    public void sayGoodbye() {}
+    public synchronized void sayGoodbye() {}
 
-    public void alertTheWaiter() {}
+    public synchronized void alertTheWaiter() {
+        Chef chef = (Chef) Thread.currentThread();
+        chef.setChefState(ChefStates.DLVPT);
+    }
     
 }
 
