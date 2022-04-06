@@ -2,7 +2,7 @@ package entities;
 
 import sharedRegions.Table;
 
-public class Student {
+public class Student extends Thread {
     
     //identify the student
     //id + the state the student is in
