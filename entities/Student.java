@@ -9,15 +9,17 @@ public class Student {
     private int studentID;
     private int studentState;
     private boolean firstStudent;
+    private boolean lastStudent;
     private final Table table;
 
 
-    public Student(int studentID, Table table, boolean firstStudent){
+    public Student(int studentID, Table table, boolean firstStudent, boolean lastStudent){
         //initial state
         this.studentID = studentID;
         studentState = StudentStates.GGTRT;
         this.table = table;
         this.firstStudent = firstStudent;
+        this.lastStudent = lastStudent;
     }
 
     public void setStudentID(int id){
@@ -58,6 +60,7 @@ public class Student {
             table.describeTheOrder();
 
             table.joinTheTalk();
+
         }
 
         table.startEating();
@@ -65,7 +68,18 @@ public class Student {
         table.endEating();
 
         while(table.hasEverybodyFinished());
-        
+
         table.signalTheWaiter();
+
+        if(lastStudent) {
+
+            table.shouldHaveArrivedEarlier();
+
+            table.honourTheBill();
+
+        }
+
+        table.exit();
+        
     }
 }

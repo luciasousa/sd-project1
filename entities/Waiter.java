@@ -31,20 +31,51 @@ public class Waiter {
         switch(c) {
 
             case 'c':
+
                 bar.saluteTheClient();
+
                 bar.returnToBar();
+
+                bar.lookAround();
             
             case 'o':
+
                 bar.getThePad();
+
                 bar.handTheNoteToChef();
+
                 bar.returnToBar();
+
+                bar.lookAround();
             
             case 'p':
+
                 while(!bar.haveAllClientsBeenServed()) {
+
                     bar.collectPortion();
+
                     bar.deliverPortion();
+
                 }
+
                 bar.returnToBar();
+
+                bar.lookAround();
+
+            case 'b':
+
+                bar.prepareTheBill();
+
+                bar.presentTheBill();
+
+                bar.returnToBar();
+
+                bar.lookAround();
+                
+            case 'g':
+
+                bar.sayGoodbye();
+                
         }
 
     }

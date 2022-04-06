@@ -27,12 +27,13 @@ public class Chef extends Thread {
 
     //fucntion run - thread 
     public void run() {
+        
         kitchen.watchTheNews();
 
         kitchen.startPreparation();
 
         do {
-            
+
             if(!firstCourse) kitchen.continuePreparation(); else firstCourse = false;
 
             kitchen.proceedToPresentation();
@@ -49,5 +50,6 @@ public class Chef extends Thread {
         } while(!kitchen.hasTheOrderBeenCompleted());
 
         kitchen.cleanUp();
+
     }
 }
