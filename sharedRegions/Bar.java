@@ -21,15 +21,11 @@ public class Bar {
     public void returnToBar() {}
 
     public void getThePad() {}
-
-    public void handTheNoteToChef() {}
     
     public char lookAround() {
         return '0';
     }
-
-    public void collectPortion() {}
-
+    
     public void deliverPortion() {}
 
     public boolean haveAllClientsBeenServed() {
@@ -41,6 +37,8 @@ public class Bar {
     public void presentTheBill() {}
 
     public void sayGoodbye() {}
+
+    public void alertTheWaiter() {}
     
 }
 

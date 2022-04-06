@@ -8,11 +8,13 @@ public class Waiter {
 
     private int waiterState;
     private Bar bar;
+    private Kitchen kitchen;
 
-    public Waiter(Bar bar){
+    public Waiter(Bar bar, Kitchen kitchen){
         //initial state
         waiterState = WaiterStates.APPST;
         this.bar = bar;
+        this.kitchen = kitchen;
     }
 
     public void setWaiterState(int state){
@@ -42,7 +44,7 @@ public class Waiter {
 
                 bar.getThePad();
 
-                bar.handTheNoteToChef();
+                kitchen.handTheNoteToChef(3,7);
 
                 bar.returnToBar();
 
@@ -52,7 +54,7 @@ public class Waiter {
 
                 while(!bar.haveAllClientsBeenServed()) {
 
-                    bar.collectPortion();
+                    kitchen.collectPortion();
 
                     bar.deliverPortion();
 

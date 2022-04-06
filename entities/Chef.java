@@ -9,12 +9,14 @@ public class Chef extends Thread {
 
     private int chefState;
     private Kitchen kitchen;
+    private Bar bar;
     private boolean firstCourse = true;
 
-    public Chef(Kitchen kitchen){
+    public Chef(Kitchen kitchen, Bar bar){
         //initial state
         chefState = ChefStates.WAFOR;
         this.kitchen = kitchen;
+        this.bar = bar;
     }
 
     public void setChefState(int state){
@@ -27,7 +29,7 @@ public class Chef extends Thread {
 
     //fucntion run - thread 
     public void run() {
-        
+
         kitchen.watchTheNews();
 
         kitchen.startPreparation();
@@ -38,13 +40,13 @@ public class Chef extends Thread {
 
             kitchen.proceedToPresentation();
 
-            kitchen.alertTheWaiter();
+            bar.alertTheWaiter();
 
             while(!kitchen.haveAllPortionsBeenDelivered()) {
                 
                 kitchen.haveNextPortionReady();
 
-                kitchen.alertTheWaiter();
+                bar.alertTheWaiter();
             }
 
         } while(!kitchen.hasTheOrderBeenCompleted());
