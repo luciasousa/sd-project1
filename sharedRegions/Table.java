@@ -1,7 +1,10 @@
 package sharedRegions;
 import libraries.*;
+import main.Constants;
+
 import java.util.*;
 import entities.*;
+import java.lang.*;
 
 /*
 TABLE
@@ -10,42 +13,380 @@ TABLE
 
 public class Table {
 
-    public void walkABit() {}
+    //lista com o ID dos estudantes pela ordem de chegada à mesa
+    Queue<Integer> studentsInTableQueue;
 
-    public void enter() {}
+    //array com a ordem de chegada dos estudantes
+    int[] studentsOrder;
 
-    public void readMenu() {}
+    //variáveis com os IDs do primeiro e último estudante
+    int firstStudent;
+    int lastStudent;
 
-    public void prepareTheOrder() {}
+    //número de porções que já foram entregues
+    int numberOfPortionsDelivered;
 
-    public void joinTheTalk() {}
+    //número de porções que já foram comidas
+    int numberOfPortionsEaten;
 
-    public void informCompanion() {}
+    //lista com pedidos dos estudantes
+    Queue<Request> coursesRequestsQueue;
+    int numberOfCoursesRequests;
 
-    public void addUpOnesChoice() {}
+    //array de estudantes
+    Student[] student;
 
-    public void callWaiter() {}
+    //flags
+    //flag para indicar que o waiter regressou ao bar depois de ter entregue o menu
+    boolean waiterHasReturnedToTheBar = false;
+    //flags para indicar se todos os estudantes informaram o primeiro
+    boolean[] studentHasBeenInformed = new boolean[Constants.N-1];
+    //flag para indicar que conta foi paga
+    boolean billPaid = false;
 
-    public void describeTheOrder() {}
+    public Table(){
+        //inicializar threads dos estudantes
+        student = new Student[Constants.N];
+        for(int i = 0; i < Constants.N; i++){
+            student[i] = null;
+        }
 
-    public void startEating() {}
+        //inicializar array [1,2...,N]
+        studentsOrder = new int[Constants.N];
+        Arrays.setAll(studentsOrder, i -> i + 1);
 
-    public void endEating() {}
+        //inicializar queue dos estudantes
+        studentsInTableQueue = new LinkedList<>();
 
-    public void signalTheWaiter() {}
+        //inicializar variáveis
+        firstStudent = 0;
+        lastStudent = 0;
+        numberOfPortionsDelivered = 0;
+        numberOfPortionsEaten = 0;
+        coursesRequestsQueue = new LinkedList<>();
+        numberOfCoursesRequests = 0;
 
-    public void shouldHaveArrivedEarlier() {}
 
-    public void honourTheBill() {}
+    }
 
-    public void exit() {}
 
-    public boolean hasEverybodyChosen() {
+    public synchronized void walkABit() {
+        //TODO: isto é feito aqui ou fora?? acho que deve ser fora maaaas
+
+        //método: Thread.sleep ((long) (1 + 100 * Math.random ())
+
+        //estudantes vão chegando ao restaurante aleatoriamente
+        //estudantes estão no primeiro estado bloqueados
+
+        //gerar array de 1 a N com ordem alatória
+        //studentsOrder = [1,2,3,...,N] to a random order
+        Random rand = new Random();
+		for (int i = 0; i < studentsOrder.length; i++) {
+			int randomIndexToSwap = rand.nextInt(studentsOrder.length);
+			int temp = studentsOrder[randomIndexToSwap];
+			studentsOrder[randomIndexToSwap] = studentsOrder[i];
+			studentsOrder[i] = temp;
+		}
+
+        //atualizar variáveis do primeiro e último estudante
+        firstStudent=studentsOrder[0];
+        lastStudent=studentsOrder[Constants.N-1];
+
+    }
+
+    public synchronized void enter() {
+
+        //entra estudante um a um
+        //adicionar à lista o estudante que se senta à mesa
+        //passar para o estado TKSTT (1)
+        for(int i=0; i<Constants.N; i++){
+            //definir o id do estudante
+            student[studentsOrder[i]].setStudentID(studentsOrder[i]);
+            int studentID = student[studentsOrder[i]].getStudentID();
+            //definir o novo estado do estudante, TAKE A SEAT AT THE TABLE
+            student[studentID].setStudentState(StudentStates.TKSTT);
+            //adicionar estudante à queue de estudantes na mesa
+            studentsInTableQueue.add(studentsOrder[i]);
+            
+            //acordar o waiter para ele entregar o menu
+            notifyAll();
+            //adormecer o estudante até waiter voltar para o bar
+
+            //TODO: adicionar flag no bar
+
+            while(!waiterHasReturnedToTheBar){
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //estudantes vão chegando e empregado vai entregando menus e regressando ao bar
+        }
+
+
+    }
+
+    public synchronized void readMenu() {
+
+        //estudante vai ler menu e escolher o pedido
+        //transita para o estado SELCS (2)
+        Student student = ((Student) Thread.currentThread());
+        student.setStudentState(StudentStates.SELCS);
+        
+        //TODO:seleciona course
+        
+    }
+
+    public synchronized void prepareTheOrder() {
+
+        //primeiro estudante vai organizar o pedido
+        //passa para o estado OGODR
+        Student student = ((Student) Thread.currentThread());
+        int studentID = student.getStudentID();
+        if(firstStudent == studentID){
+            //primeiro estudante adiciona o seu pedido
+            numberOfCoursesRequests=1;
+            student.setStudentState(StudentStates.OGODR);
+            //TODO: adiciona ao pedido quando estudante informa
+            addUpOnesChoice();
+        }
+
+    }
+
+    public synchronized void informCompanion() {
+        //se não é o primeiro estudante então vai informar o seu pedido ao primeiro estudante
+        //todos os estudantes menos o primeiro transitam para o estado CHTWC
+        Student student = ((Student) Thread.currentThread());
+        int studentID = student.getStudentID();
+        if(firstStudent != studentID){
+            student.setStudentState(StudentStates.CHTWC);
+            studentHasBeenInformed[studentID] = true;
+        }
+
+    }
+
+    public synchronized void joinTheTalk() {
+        //pedidos feitos, todos escolheram, chamar o empregado
+        while(!hasEverybodyChosen()){
+            addUpOnesChoice();
+        }
+
+        //bloqueiam estudantes
+        //chamam empregado
+        //callWaiter();
+
+        //dizem-lhe o pedido
+        //describeTheOrder();
+
+        //primeiro estudante passa para o estado CHTWC
+        student[firstStudent].setStudentState(StudentStates.CHTWC);
+
+        
+        
+
+    }
+
+    public synchronized void addUpOnesChoice() {
+        //primeiro estudante adiciona pedidos dos restantes
+        //primeiro estudante mantem-se no estado OGODR
+        for(int i = 0; i < Constants.N-1; i++){
+            //se foi informado
+            if(studentHasBeenInformed[i]){
+                numberOfCoursesRequests++;
+            }
+        }
+        
+    }
+
+    public synchronized void callWaiter() {
+
+        //acordar o waiter para lhe darem o pedido
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void describeTheOrder() {
+        //adicionar pedidos à queue
+        for (int i=0; i < numberOfCoursesRequests; i++){
+            Request r = new Request(i, "course");
+            coursesRequestsQueue.add(r);
+        }
+    }
+
+    public synchronized void startEating() {
+        //estudante passa para o estado EJYML
+        Student student = ((Student) Thread.currentThread());
+        student.setStudentState(StudentStates.EJYML);
+
+    }
+
+    public synchronized void endEating() {
+        //aumenta o número de porções comidas
+        numberOfPortionsEaten++;
+        //estudante passa para o estado CHTWC
+        Student student = ((Student) Thread.currentThread());
+        student.setStudentState(StudentStates.CHTWC);
+    }
+
+    public synchronized void signalTheWaiter() {
+        //acordar o waiter para lhe darem o pedido
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void shouldHaveArrivedEarlier() {
+        //ultimo estudante passa para o estado de PYTBL
+        Student student = ((Student) Thread.currentThread());
+        int studentID = student.getStudentID();
+        if(lastStudent == studentID){
+            student.setStudentState(StudentStates.PYTBL);
+            billPaid = true;
+        }
+    }
+
+    public synchronized void honourTheBill() {
+
+        //mantém no estado PYTBL até conta estar paga
+        //se paga passa para estado GGHOM
+        if(billPaid){
+            Student student = ((Student) Thread.currentThread());
+            int studentID = student.getStudentID();
+            if(lastStudent == studentID){
+                student.setStudentState(StudentStates.GGHOM);
+        }
+        }
+
+    }
+
+    public synchronized void exit() {
+        //passam para o estado GGHOM
+        //exit quando todos terminaram de comer e último ter pago a conta
+        //vai sair um a um, empregado vai deizer adeus
+        for(int i=0; i<Constants.N; i++){
+
+            int studentID = student[studentsOrder[i]].getStudentID();
+            student[studentID].setStudentState(StudentStates.GGHOM);
+            
+            //acordar o waiter para ele entregar o menu
+            notifyAll();
+            //adormecer o estudante até waiter voltar para o bar
+
+            //TODO: adicionar flag no bar
+
+            while(!waiterHasReturnedToTheBar){
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //estudantes vão saindo e empregado vai dizendo adeus
+        }
+    }
+
+    public synchronized boolean hasEverybodyChosen() {
+        //retorna true quando o número de pedidos é N
+        if(numberOfCoursesRequests == Constants.N){
+            return true;
+        }
         return false;
     }
 
-    public boolean hasEverybodyFinished() {
+    public synchronized boolean hasEverybodyFinished() {
+        //retorna true quando o número de porções comidas é N
+        if(numberOfPortionsEaten == Constants.N){
+            return true;
+        }
         return false;
+    }
+
+
+    public synchronized void saluteTheClient() {
+
+        //TODO: alterar estado do waiter
+
+        //estudante bloqueado
+        //waiter vai cumprimentar estudante e regressa ao bar
+        //acordar o waiter para ir à mesa
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public synchronized void presentTheBill() {
+
+        //TODO: alterar estado do waiter
+
+        //acordar o waiter para ir à mesa
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public synchronized void deliverPortion() {
+
+        //TODO: alterar estado do waiter
+        //acordar o waiter para ir à mesa
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //incrementar número de porções entregues
+        numberOfPortionsDelivered++;
+
     }
     
 }
+
