@@ -16,13 +16,6 @@ public class Table {
     //lista com o ID dos estudantes pela ordem de chegada à mesa
     Queue<Integer> studentsInTableQueue;
 
-    //array com a ordem de chegada dos estudantes
-    int[] studentsOrder;
-
-    //variáveis com os IDs do primeiro e último estudante
-    int firstStudent;
-    int lastStudent;
-
     //número de porções que já foram entregues
     int numberOfPortionsDelivered;
 
@@ -40,7 +33,7 @@ public class Table {
     //flag para indicar que o waiter regressou ao bar depois de ter entregue o menu
     boolean waiterHasReturnedToTheBar = false;
     //flags para indicar se todos os estudantes informaram o primeiro
-    boolean[] studentHasBeenInformed = new boolean[Constants.N-1];
+    boolean[] studentHasBeenInformed = new boolean[Constants.N];
     //flag para indicar que conta foi paga
     boolean billPaid = false;
 
@@ -51,16 +44,9 @@ public class Table {
             student[i] = null;
         }
 
-        //inicializar array [1,2...,N]
-        studentsOrder = new int[Constants.N];
-        Arrays.setAll(studentsOrder, i -> i + 1);
-
         //inicializar queue dos estudantes
         studentsInTableQueue = new LinkedList<>();
 
-        //inicializar variáveis
-        firstStudent = 0;
-        lastStudent = 0;
         numberOfPortionsDelivered = 0;
         numberOfPortionsEaten = 0;
         coursesRequestsQueue = new LinkedList<>();
@@ -71,26 +57,14 @@ public class Table {
 
 
     public synchronized void walkABit() {
-        //TODO: isto é feito aqui ou fora?? acho que deve ser fora maaaas
-
-        //método: Thread.sleep ((long) (1 + 100 * Math.random ())
 
         //estudantes vão chegando ao restaurante aleatoriamente
         //estudantes estão no primeiro estado bloqueados
-
-        //gerar array de 1 a N com ordem alatória
-        //studentsOrder = [1,2,3,...,N] to a random order
-        Random rand = new Random();
-		for (int i = 0; i < studentsOrder.length; i++) {
-			int randomIndexToSwap = rand.nextInt(studentsOrder.length);
-			int temp = studentsOrder[randomIndexToSwap];
-			studentsOrder[randomIndexToSwap] = studentsOrder[i];
-			studentsOrder[i] = temp;
-		}
-
-        //atualizar variáveis do primeiro e último estudante
-        firstStudent=studentsOrder[0];
-        lastStudent=studentsOrder[Constants.N-1];
+        //estudante fica sleep durante período random
+        try{ 
+            Thread.sleep ((long) (1 + 40 * Math.random ()));
+        }
+        catch (InterruptedException e) {}
 
     }
 
@@ -99,15 +73,12 @@ public class Table {
         //entra estudante um a um
         //adicionar à lista o estudante que se senta à mesa
         //passar para o estado TKSTT (1)
-        for(int i=0; i<Constants.N; i++){
-            //definir o id do estudante
-            student[studentsOrder[i]].setStudentID(studentsOrder[i]);
-            int studentID = student[studentsOrder[i]].getStudentID();
-            //definir o novo estado do estudante, TAKE A SEAT AT THE TABLE
-            student[studentID].setStudentState(StudentStates.TKSTT);
-            //adicionar estudante à queue de estudantes na mesa
-            studentsInTableQueue.add(studentsOrder[i]);
-            
+        Student student = ((Student) Thread.currentThread());
+        //int studentID = student.getStudentID();
+        //definir o novo estado do estudante, TAKE A SEAT AT THE TABLE
+        student.setStudentState(StudentStates.TKSTT);
+
+        
             //acordar o waiter para ele entregar o menu
             notifyAll();
             //adormecer o estudante até waiter voltar para o bar
@@ -123,7 +94,7 @@ public class Table {
             }
 
             //estudantes vão chegando e empregado vai entregando menus e regressando ao bar
-        }
+        
 
 
     }
@@ -144,13 +115,14 @@ public class Table {
         //primeiro estudante vai organizar o pedido
         //passa para o estado OGODR
         Student student = ((Student) Thread.currentThread());
+        student.setStudentState(StudentStates.OGODR);
         int studentID = student.getStudentID();
-        if(firstStudent == studentID){
-            //primeiro estudante adiciona o seu pedido
-            numberOfCoursesRequests=1;
-            student.setStudentState(StudentStates.OGODR);
-            //TODO: adiciona ao pedido quando estudante informa
-            addUpOnesChoice();
+        studentHasBeenInformed[studentID] = true;
+        numberOfCoursesRequests++;
+
+        //esperar que seja acordado pelos outros estudantes
+        while(){
+
         }
 
     }
@@ -160,18 +132,15 @@ public class Table {
         //todos os estudantes menos o primeiro transitam para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         int studentID = student.getStudentID();
-        if(firstStudent != studentID){
-            student.setStudentState(StudentStates.CHTWC);
-            studentHasBeenInformed[studentID] = true;
-        }
+        student.setStudentState(StudentStates.CHTWC);
+        studentHasBeenInformed[studentID] = true;
 
+        //desbloquear o 1º
     }
 
     public synchronized void joinTheTalk() {
         //pedidos feitos, todos escolheram, chamar o empregado
-        while(!hasEverybodyChosen()){
-            addUpOnesChoice();
-        }
+        
 
         //bloqueiam estudantes
         //chamam empregado
@@ -181,9 +150,10 @@ public class Table {
         //describeTheOrder();
 
         //primeiro estudante passa para o estado CHTWC
-        student[firstStudent].setStudentState(StudentStates.CHTWC);
-
-        
+        Student student = (Student) Thread.currentThread();
+        if(student.getStudentFirst()){
+            student.setStudentState(StudentStates.CHTWC);
+        }
         
 
     }
@@ -191,6 +161,9 @@ public class Table {
     public synchronized void addUpOnesChoice() {
         //primeiro estudante adiciona pedidos dos restantes
         //primeiro estudante mantem-se no estado OGODR
+
+        //espera por ser desbloqueado pelo informCompanion
+
         for(int i = 0; i < Constants.N-1; i++){
             //se foi informado
             if(studentHasBeenInformed[i]){
@@ -219,8 +192,9 @@ public class Table {
 
     public synchronized void describeTheOrder() {
         //adicionar pedidos à queue
+        Student student = (Student)Thread.currentThread();
         for (int i=0; i < numberOfCoursesRequests; i++){
-            Request r = new Request(i, "course");
+            Request r = new Request(student.getStudentID(), 'o');
             coursesRequestsQueue.add(r);
         }
     }
@@ -260,7 +234,7 @@ public class Table {
         //ultimo estudante passa para o estado de PYTBL
         Student student = ((Student) Thread.currentThread());
         int studentID = student.getStudentID();
-        if(lastStudent == studentID){
+        if(student.getStudentLast()){
             student.setStudentState(StudentStates.PYTBL);
             billPaid = true;
         }
@@ -272,10 +246,7 @@ public class Table {
         //se paga passa para estado GGHOM
         if(billPaid){
             Student student = ((Student) Thread.currentThread());
-            int studentID = student.getStudentID();
-            if(lastStudent == studentID){
-                student.setStudentState(StudentStates.GGHOM);
-        }
+            student.setStudentState(StudentStates.GGHOM);
         }
 
     }
@@ -284,10 +255,11 @@ public class Table {
         //passam para o estado GGHOM
         //exit quando todos terminaram de comer e último ter pago a conta
         //vai sair um a um, empregado vai deizer adeus
-        for(int i=0; i<Constants.N; i++){
+        //for(int i=0; i<Constants.N; i++){
+            Student student = (Student)Thread.currentThread();
 
-            int studentID = student[studentsOrder[i]].getStudentID();
-            student[studentID].setStudentState(StudentStates.GGHOM);
+            //int studentID = student[studentsOrder[i]].getStudentID();
+            student.setStudentState(StudentStates.GGHOM);
             
             //acordar o waiter para ele entregar o menu
             notifyAll();
@@ -304,15 +276,17 @@ public class Table {
             }
 
             //estudantes vão saindo e empregado vai dizendo adeus
-        }
+        //}
     }
 
     public synchronized boolean hasEverybodyChosen() {
         //retorna true quando o número de pedidos é N
-        if(numberOfCoursesRequests == Constants.N){
-            return true;
+        for(boolean i: studentHasBeenInformed){
+            if (!i){
+                return false;
+            }
         }
-        return false;
+        return true;
     }
 
     public synchronized boolean hasEverybodyFinished() {
@@ -326,12 +300,15 @@ public class Table {
 
     public synchronized void saluteTheClient() {
 
-        //TODO: alterar estado do waiter
+        
 
         //estudante bloqueado
         //waiter vai cumprimentar estudante e regressa ao bar
         //acordar o waiter para ir à mesa
         notifyAll();
+        //TODO: alterar estado do waiter
+        Waiter waiter =(Waiter)Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.PRSMN);
         //adormecer o estudante até waiter voltar para o bar
 
         //TODO: adicionar flag no bar
@@ -352,6 +329,9 @@ public class Table {
 
         //acordar o waiter para ir à mesa
         notifyAll();
+
+        Waiter waiter =(Waiter)Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.RECPM);
         //adormecer o estudante até waiter voltar para o bar
 
         //TODO: adicionar flag no bar
@@ -386,6 +366,11 @@ public class Table {
         //incrementar número de porções entregues
         numberOfPortionsDelivered++;
 
+    }
+
+
+    public boolean haveAllClientsBeenServed() {
+        return false;
     }
     
 }

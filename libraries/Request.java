@@ -2,9 +2,9 @@ package libraries;
 
 public class Request {
     private int requestID;
-    private String requestType;
+    private char requestType;
 
-    public Request(int id,String type){
+    public Request(int id,char type){
         this.requestID = id;
         this.requestType = type;
     }
@@ -14,7 +14,7 @@ public class Request {
         return requestID;
     }
 
-    public String getRequestType(){
+    public char getRequestType(){
 
         return requestType;
     }

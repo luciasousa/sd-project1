@@ -30,7 +30,7 @@ public class Waiter extends Thread {
     //fucntion run - thread 
     public void run() {
 
-        String s = bar.lookAround();
+        char s = bar.lookAround();
 
         switch(s) {
 
@@ -50,7 +50,7 @@ public class Waiter extends Thread {
             
             case "p": //portion ready to be collected
 
-                while(!bar.haveAllClientsBeenServed()) {
+                while(!table.haveAllClientsBeenServed()) {
 
                     kitchen.collectPortion();
 

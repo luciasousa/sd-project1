@@ -38,12 +38,29 @@ public class Student extends Thread {
         return studentState;
     }
 
+    public void setStudentFirst(boolean first){
+        firstStudent = first;
+    }
+
+    public boolean getStudentFirst(){
+        return firstStudent;
+    }
+
+    public void setStudentLast(boolean last){
+        lastStudent = last;
+    }
+
+    public boolean getStudentLast(){
+        return lastStudent;
+    }
+
     //function run - thread
     public void run() {
 
         table.walkABit();
 
         table.enter();
+        //bar.enter();
 
         table.readMenu();
 

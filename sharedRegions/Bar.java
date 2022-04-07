@@ -15,6 +15,7 @@ public class Bar {
     private Queue<Request> pendingServiceRequests;
     //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
+    private boolean orderDescribed;
 
     public synchronized void saluteTheClient() {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -30,10 +31,22 @@ public class Bar {
     public synchronized void getThePad() {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.TKODR);
+
+        //acordar 1º estudante
+        notifyAll();
+
+        
+        while(!orderDescribed){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         
     }
     
-    public synchronized String lookAround() {
+    public synchronized char lookAround() {
         Waiter waiter = (Waiter) Thread.currentThread();
         if(waiter.getWaiterState() != WaiterStates.APPST) {
             waiter.setWaiterState(WaiterStates.APPST);
@@ -47,24 +60,23 @@ public class Bar {
             }
         }
         Request request = pendingServiceRequests.poll();
+        numberOfPendingServiceRequests--;
         return request.getRequestType();
     }
-    
-    public synchronized void deliverPortion() {}
 
-    //possivelmente esta função será na Table
-    public synchronized boolean haveAllClientsBeenServed() {
-        return false;
+    //função da table, estudante acorda o waiter- waiter adiciona pedido à requests queue
+    public synchronized void callWaiter() {
+        numberOfPendingServiceRequests++;
+        Student student = (Student)Thread.currentThread();
+        int studentID = student.getStudentID();
+        Request r = new Request(studentID, 'o');
+        pendingServiceRequests.add(r);
+        
     }
 
     public synchronized void prepareTheBill() {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRCBL);
-    }
-
-    public synchronized void presentTheBill() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.RECPM);
     }
 
     public synchronized void sayGoodbye() {}
