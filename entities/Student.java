@@ -1,6 +1,7 @@
 package entities;
 
-import sharedRegions.Table;
+import main.Constants;
+import sharedRegions.*;
 
 public class Student extends Thread {
     
@@ -11,13 +12,15 @@ public class Student extends Thread {
     private boolean firstStudent;
     private boolean lastStudent;
     private final Table table;
+    private final Bar bar;
 
 
-    public Student(int studentID, Table table, boolean firstStudent, boolean lastStudent){
+    public Student(int studentID, Table table, boolean firstStudent, boolean lastStudent, Bar bar){
         //initial state
         this.studentID = studentID;
         studentState = StudentStates.GGTRT;
         this.table = table;
+        this.bar=bar;
         this.firstStudent = firstStudent;
         this.lastStudent = lastStudent;
     }
@@ -60,7 +63,7 @@ public class Student extends Thread {
         walkABit();
 
         table.enter();
-        //bar.enter();
+        bar.enter();
 
         table.readMenu();
 
@@ -73,18 +76,25 @@ public class Student extends Thread {
             while(!table.hasEverybodyChosen()) table.addUpOnesChoice();
 
             table.callWaiter();
-
+            bar.callWaiter();
+            
             table.describeTheOrder();
+            bar.describeTheOrder();
 
             table.joinTheTalk();
 
         }
 
-        table.startEating();
+        for(int i=0; i< Constants.M; i++){
+            table.startEating();
 
-        table.endEating();
+            table.endEating();
+    
+            while(table.hasEverybodyFinished());
 
-        while(table.hasEverybodyFinished());
+            bar.hasEverybodyFinished();
+        }
+       
 
         table.signalTheWaiter();
 

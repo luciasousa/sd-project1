@@ -43,6 +43,7 @@ public class Waiter extends Thread {
             case "o": //order ready to be collected
 
                 bar.getThePad();
+                table.getThePad();
 
                 kitchen.handTheNoteToChef(3,7);
 
@@ -52,8 +53,8 @@ public class Waiter extends Thread {
 
                 while(!table.haveAllClientsBeenServed()) {
 
+                    bar.collectPortion();
                     kitchen.collectPortion();
-
                     table.deliverPortion();
 
                 }

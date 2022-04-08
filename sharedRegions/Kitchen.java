@@ -23,12 +23,11 @@ public class Kitchen {
             chef.setChefState(ChefStates.WAFOR);
         }
 
-        while(isNoteAvailable) {
-            try{
-                wait();
-            } catch(Exception e) {
-                System.out.println("Thread was interrupted");
-            }
+        
+        try{
+            wait();
+        } catch(Exception e) {
+            System.out.println("Thread was interrupted");
         }
     }
 
@@ -36,16 +35,36 @@ public class Kitchen {
     public synchronized void handTheNoteToChef(int numberOfCoursesToDeliver, int numberOfStudents) {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PCODR);
-        isNoteAvailable = true;
+        notify();
         this.numberOfCoursesToDeliver = numberOfCoursesToDeliver;
         this.numberOfPortionsToDeliver = numberOfStudents;
         this.numberOfStudentsInRestaurant = numberOfStudents;
+
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
+    public synchronized void alertTheWaiter() {
+        
+        Chef chef = (Chef) Thread.currentThread();
+        chef.setChefState(ChefStates.DLVPT);
+
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     public synchronized void startPreparation() {
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         numberOfCoursesToDeliver--;
+        notify();
     }
 
     public synchronized void proceedToPresentation() {
@@ -71,8 +90,9 @@ public class Kitchen {
     }
 
     public synchronized void collectPortion() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.WTFPT);
+        
+        notify();
+
     }
 
     public synchronized void continuePreparation() {

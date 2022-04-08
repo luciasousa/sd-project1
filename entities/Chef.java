@@ -31,7 +31,7 @@ public class Chef extends Thread {
     public void run() {
 
         kitchen.watchTheNews();
-
+        
         kitchen.startPreparation();
 
         do {
@@ -39,8 +39,10 @@ public class Chef extends Thread {
             if(!firstCourse) kitchen.continuePreparation(); else firstCourse = false;
 
             kitchen.proceedToPresentation();
-
+            
+            kitchen.alertTheWaiter();
             bar.alertTheWaiter();
+            
 
             while(!kitchen.haveAllPortionsBeenDelivered()) {
                 

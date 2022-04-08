@@ -1,5 +1,7 @@
 package sharedRegions;
 import libraries.*;
+import main.Constants;
+
 import java.util.*;
 import entities.*;
 
@@ -32,19 +34,19 @@ public class Bar {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.TKODR);
 
-        //acordar 1º estudante
-        notifyAll();
-
-        
-        while(!orderDescribed){
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         
     }
+
+    public synchronized void describeTheOrder() {
+        //Request r = Request(Constants.N-1,'o');
+        notify();
+    }
+
     
     public synchronized char lookAround() {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -66,11 +68,12 @@ public class Bar {
 
     //função da table, estudante acorda o waiter- waiter adiciona pedido à requests queue
     public synchronized void callWaiter() {
-        numberOfPendingServiceRequests++;
+        /*numberOfPendingServiceRequests++;
         Student student = (Student)Thread.currentThread();
         int studentID = student.getStudentID();
         Request r = new Request(studentID, 'o');
-        pendingServiceRequests.add(r);
+        pendingServiceRequests.add(r);*/
+        notify();
         
     }
 
@@ -82,8 +85,27 @@ public class Bar {
     public synchronized void sayGoodbye() {}
 
     public synchronized void alertTheWaiter() {
-        Chef chef = (Chef) Thread.currentThread();
-        chef.setChefState(ChefStates.DLVPT);
+    
+        notify();
+    }
+
+    public synchronized void collectPortion() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.WTFPT);
+
+    }
+
+    public synchronized void hasEverybodyFinished() {
+        //retorna true quando o número de porções comidas é N
+        
+
+    }
+
+    public void enter() {
+        /*Waiter waiter = (Waiter) Thread.currentThread();
+        Request r = new Request(Constants.N-1, 'c');
+        pendingServiceRequests.add(r);*/
+        notify();
     }
     
 }
