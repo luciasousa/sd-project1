@@ -55,19 +55,6 @@ public class Table {
 
     }
 
-
-    public synchronized void walkABit() {
-
-        //estudantes vão chegando ao restaurante aleatoriamente
-        //estudantes estão no primeiro estado bloqueados
-        //estudante fica sleep durante período random
-        try{ 
-            Thread.sleep ((long) (1 + 40 * Math.random ()));
-        }
-        catch (InterruptedException e) {}
-
-    }
-
     public synchronized void enter() {
 
         //entra estudante um a um
@@ -79,24 +66,23 @@ public class Table {
         student.setStudentState(StudentStates.TKSTT);
 
         
-            //acordar o waiter para ele entregar o menu
-            notifyAll();
-            //adormecer o estudante até waiter voltar para o bar
+        //wait() method causes the current thread to wait indefinitely until another thread either invokes 
+        //notify() for this object or notifyAll().
 
-            //TODO: adicionar flag no bar
+        //waiter wait() -> student enters -> notify() -> waiter is awake
 
-            while(!waiterHasReturnedToTheBar){
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        //acordar o waiter para ele entregar o menu
+        notifyAll();
+        //adormecer o estudante até waiter voltar para o bar
+
+        //TODO: adicionar flag no bar
+        while(!waiterHasReturnedToTheBar){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-
-            //estudantes vão chegando e empregado vai entregando menus e regressando ao bar
-        
-
-
+        }
     }
 
     public synchronized void readMenu() {
@@ -106,7 +92,7 @@ public class Table {
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.SELCS);
         
-        //TODO:seleciona course
+        //seleciona course
         
     }
 
@@ -121,14 +107,21 @@ public class Table {
         numberOfCoursesRequests++;
 
         //esperar que seja acordado pelos outros estudantes
-        while(){
-
+        //só a thread do primeiro estudante faz esta função
+        //por isso faz wait até notify dos outros estudantes
+        try {
+            wait();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
+        //fica nesta estado até ser acordado, 
+        //ou seja, até add up ones choice / has everybody chosen / call the waiter / describe the order
     }
 
     public synchronized void informCompanion() {
         //se não é o primeiro estudante então vai informar o seu pedido ao primeiro estudante
+        //vão 
         //todos os estudantes menos o primeiro transitam para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         int studentID = student.getStudentID();
@@ -136,19 +129,12 @@ public class Table {
         studentHasBeenInformed[studentID] = true;
 
         //desbloquear o 1º
+        notify();
     }
 
     public synchronized void joinTheTalk() {
         //pedidos feitos, todos escolheram, chamar o empregado
         
-
-        //bloqueiam estudantes
-        //chamam empregado
-        //callWaiter();
-
-        //dizem-lhe o pedido
-        //describeTheOrder();
-
         //primeiro estudante passa para o estado CHTWC
         Student student = (Student) Thread.currentThread();
         if(student.getStudentFirst()){
@@ -299,8 +285,6 @@ public class Table {
 
 
     public synchronized void saluteTheClient() {
-
-        
 
         //estudante bloqueado
         //waiter vai cumprimentar estudante e regressa ao bar

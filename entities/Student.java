@@ -57,7 +57,7 @@ public class Student extends Thread {
     //function run - thread
     public void run() {
 
-        table.walkABit();
+        walkABit();
 
         table.enter();
         //bar.enter();
@@ -98,5 +98,21 @@ public class Student extends Thread {
 
         table.exit();
         
+    }
+
+    /**
+   *  Living normal life.
+   *
+   *  Internal operation.
+   */
+
+    private void walkABit() {
+        //estudantes vão chegando ao restaurante aleatoriamente
+        //estudantes estão no primeiro estado bloqueados
+        //estudante fica sleep durante período random
+        try{ 
+            Thread.sleep ((long) (1 + 40 * Math.random ()));
+        }
+        catch (InterruptedException e) {}
     }
 }
