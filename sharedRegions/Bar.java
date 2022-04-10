@@ -1,28 +1,62 @@
 package sharedRegions;
 import libraries.*;
 import main.Constants;
-
-import java.util.*;
+import commInfra.*;
 import entities.*;
 
-/*
-BAR
-
-*/
+/**
+ *    BAR
+ *
+ *    It is responsible for the the synchronization of the Students and Waiter
+ *    is implemented as an implicit monitor.
+ *    
+ *    There are internal synchronization points: 
+ *    blocking point for the Waiter, where he waits for the Student to signal
+ *    blocking point for the Waiter, where he waits for the Chef to signal
+ */
 
 public class Bar {
     //número de serviços pendentes
     private int numberOfPendingServiceRequests;
     //fila com os serviços pendentes
-    private Queue<Request> pendingServiceRequests;
+    private MemFIFO<Request> pendingServiceRequests;
     //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
     private boolean orderDescribed;
 
+    private final GeneralRepository repos;
+
+    public Bar(GeneralRepository repos){
+        //initialize queue requests
+        try {
+            pendingServiceRequests = new MemFIFO(new Request[Constants.N]);
+        } catch (MemException e) {
+            pendingServiceRequests = null;
+            e.printStackTrace();
+        }
+        //initialize other variables
+        numberOfPendingServiceRequests = 0;
+        numberOfStudentsInRestaurant = 0;
+        orderDescribed = false;
+        this.repos=repos;
+    }
+
+    public void enter() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        numberOfStudentsInRestaurant++;
+        Request r = new Request(numberOfStudentsInRestaurant-1, 'c');
+        try {
+            pendingServiceRequests.write(r);
+        } catch (MemException e) {
+            e.printStackTrace();
+        }
+        notify();
+    }
+
     public synchronized void saluteTheClient() {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRSMN);
-        numberOfStudentsInRestaurant++;
+        //numberOfStudentsInRestaurant++;
     }
 
     public synchronized void returnToBar() {
@@ -61,7 +95,12 @@ public class Bar {
                 System.out.println("Thread interrupted");
             }
         }
-        Request request = pendingServiceRequests.poll();
+        Request request = null;
+        try {
+            request = pendingServiceRequests.read();
+        } catch (MemException e) {
+            e.printStackTrace();
+        }
         numberOfPendingServiceRequests--;
         return request.getRequestType();
     }
@@ -101,12 +140,7 @@ public class Bar {
 
     }
 
-    public void enter() {
-        /*Waiter waiter = (Waiter) Thread.currentThread();
-        Request r = new Request(Constants.N-1, 'c');
-        pendingServiceRequests.add(r);*/
-        notify();
-    }
+    
     
 }
 

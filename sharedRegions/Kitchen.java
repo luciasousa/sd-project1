@@ -4,10 +4,15 @@ import java.util.Queue;
 
 import entities.*;
 
-/*
-KITCHEN
-
-*/
+/**
+ *    KITCHEN
+ *
+ *    It is responsible for the the synchronization of the Chef and Waiter
+ *    is implemented as an implicit monitor.
+ *    
+ *    There is one internal synchronization points: 
+ *    a single blocking point for the Chef, where he waits for the Waiter to signal
+ */
 
 public class Kitchen {
     

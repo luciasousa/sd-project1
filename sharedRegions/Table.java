@@ -4,12 +4,16 @@ import main.Constants;
 
 import java.util.*;
 import entities.*;
-import java.lang.*;
 
-/*
-TABLE
-
-*/
+/**
+ *    TABLE
+ *
+ *    It is responsible for the the synchronization of the Students and Waiter
+ *    is implemented as an implicit monitor.
+ *    
+ *    There is one internal synchronization points: 
+ *    a single blocking point for the Student, where he waits for the Waiter to signal
+ */
 
 public class Table {
 
@@ -34,10 +38,14 @@ public class Table {
     boolean waiterHasReturnedToTheBar = false;
     //flags para indicar se todos os estudantes informaram o primeiro
     //boolean[] studentHasBeenInformed = new boolean[Constants.N];
-    //flag para indicar que conta foi paga
+    //flag para indicar que conta foi p aga
     boolean billPaid = false;
 
-    public Table(){
+    int numberOfStudentsInRestaurant;
+
+    private final GeneralRepository repos;
+
+    public Table(GeneralRepository repos){
         //inicializar threads dos estudantes
         student = new Student[Constants.N];
         for(int i = 0; i < Constants.N; i++){
@@ -51,8 +59,8 @@ public class Table {
         numberOfPortionsEaten = 0;
         studentsRequestsQueue = new LinkedList<>();
         numberOfStudentsRequests = 0;
-
-
+        numberOfStudentsInRestaurant=0;
+        this.repos=repos;
     }
 
     public synchronized void enter() {
@@ -64,7 +72,7 @@ public class Table {
         //int studentID = student.getStudentID();
         //definir o novo estado do estudante, TAKE A SEAT AT THE TABLE
         student.setStudentState(StudentStates.TKSTT);
-
+        numberOfStudentsInRestaurant++;
         
         //wait() method causes the current thread to wait indefinitely until another thread either invokes 
         //notify() for this object or notifyAll().
@@ -298,7 +306,7 @@ public class Table {
     public synchronized boolean hasEverybodyChosen() {
         //retorna true quando o número de pedidos é N
         
-        if (numberOfStudentsRequests == (Constants.N - 1)){
+        if (numberOfStudentsRequests == numberOfStudentsInRestaurant-1){
             return true;
         }
         return false;
@@ -306,7 +314,7 @@ public class Table {
 
     public synchronized boolean hasEverybodyFinished() {
         //retorna true quando o número de porções comidas é N
-        if(numberOfPortionsEaten == Constants.N){
+        if(numberOfPortionsEaten == numberOfStudentsInRestaurant){
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -360,7 +368,7 @@ public class Table {
 
 
     public boolean haveAllClientsBeenServed() {
-        if(numberOfPortionsDelivered == Constants.N) {
+        if(numberOfPortionsDelivered == numberOfStudentsInRestaurant) {
             return true; 
         }
         else return false;
