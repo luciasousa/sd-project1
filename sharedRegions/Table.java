@@ -25,7 +25,7 @@ public class Table {
 
     //número de porções que já foram comidas
     int numberOfPortionsEaten;
-
+    private boolean dishReady = false;
     //lista com pedidos dos estudantes
     Queue<Request> studentsRequestsQueue;
     int numberOfStudentsRequests;
@@ -40,9 +40,6 @@ public class Table {
     //boolean[] studentHasBeenInformed = new boolean[Constants.N];
     //flag para indicar que conta foi p aga
     boolean billPaid = false;
-
-    int numberOfStudentsInRestaurant;
-
     private final GeneralRepository repos;
 
     public Table(GeneralRepository repos){
@@ -54,34 +51,19 @@ public class Table {
 
         //inicializar queue dos estudantes
         studentsInTableQueue = new LinkedList<>();
-
         numberOfPortionsDelivered = 0;
         numberOfPortionsEaten = 0;
         studentsRequestsQueue = new LinkedList<>();
         numberOfStudentsRequests = 0;
-        numberOfStudentsInRestaurant=0;
-        this.repos=repos;
+        this.repos = repos;
     }
 
-    public synchronized void enter() {
-
+    public synchronized void takeASeat() {
         //entra estudante um a um
         //adicionar à lista o estudante que se senta à mesa
-        //passar para o estado TKSTT (1)
+        //passar para o estado TKSTT
         Student student = ((Student) Thread.currentThread());
-        //int studentID = student.getStudentID();
-        //definir o novo estado do estudante, TAKE A SEAT AT THE TABLE
         student.setStudentState(StudentStates.TKSTT);
-        numberOfStudentsInRestaurant++;
-        
-        //wait() method causes the current thread to wait indefinitely until another thread either invokes 
-        //notify() for this object or notifyAll().
-
-        //waiter wait() -> student enters -> notify() -> waiter is awake
-
-        //acordar o waiter para ele entregar o menu
-        
-        //adormecer o estudante até waiter voltar para o bar
         
         try {
             wait();
@@ -91,15 +73,13 @@ public class Table {
     }
 
     public synchronized void saluteTheClient() {
-
         //estudante bloqueado
-        
         notify();
 
-        Waiter waiter =(Waiter)Thread.currentThread();
+        Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRSMN);
-        //adormecer o estudante até waiter voltar para o bar
 
+        //adormecer o estudante até waiter voltar para o bar
         try {
             wait();
         } catch (InterruptedException e) {
@@ -108,26 +88,18 @@ public class Table {
     }
 
     public synchronized void readMenu() {
-
         //estudante vai ler menu e escolher o pedido
-        //transita para o estado SELCS (2)
+        //transita para o estado SELCS
         notify();
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.SELCS);
-        
-        //seleciona course
-        
     }
 
     public synchronized void prepareTheOrder() {
-
         //primeiro estudante vai organizar o pedido
         //passa para o estado OGODR
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.OGODR);
-        //int studentID = student.getStudentID();
-        //studentHasBeenInformed[studentID] = true;
-        //numberOfStudentsRequests++;
 
         //esperar que seja acordado pelos outros estudantes
         //só a thread do primeiro estudante faz esta função
@@ -137,83 +109,69 @@ public class Table {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //fica nesta estado até ser acordado, 
-        //ou seja, até add up ones choice / has everybody chosen / call the waiter / describe the order
     }
 
     public synchronized void informCompanion() {
         //se não é o primeiro estudante então vai informar o seu pedido ao primeiro estudante
-        //vão 
         //todos os estudantes menos o primeiro transitam para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
-        //int studentID = student.getStudentID();
         student.setStudentState(StudentStates.CHTWC);
-        //studentHasBeenInformed[studentID] = true;
+        //desbloquear o 1º estudante
+        notifyAll();
 
-        //desbloquear o 1º estudante -> só uma thread
-        notify();
-
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        while(!dishReady) 
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public synchronized void joinTheTalk() {
         //pedidos feitos, todos escolheram, chamar o empregado
-        
         //primeiro estudante passa para o estado CHTWC
         Student student = (Student) Thread.currentThread();
         student.setStudentState(StudentStates.CHTWC);
-        
 
         try {
             wait();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
-
     }
 
     public synchronized void addUpOnesChoice() {
         //primeiro estudante adiciona pedidos dos restantes
         //primeiro estudante mantem-se no estado OGODR
-
         //espera por ser desbloqueado pelo informCompanion
-
         numberOfStudentsRequests++;
 
         try {
             wait();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        
+        } 
     }
 
     public synchronized void callWaiter() {
         //acordar o waiter para lhe darem o pedido
         //notify();        
         //adormecer o estudante até waiter voltar para o bar
-        
         try {
             wait();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        
     }
 
     public synchronized void getThePad() {
-        notify();
-        
+        notify();   
     }
 
     public synchronized void describeTheOrder() {
-
+        //acordar o waiter para sincronizar
     }
 
     public synchronized void startEating() {
@@ -306,7 +264,7 @@ public class Table {
     public synchronized boolean hasEverybodyChosen() {
         //retorna true quando o número de pedidos é N
         
-        if (numberOfStudentsRequests == numberOfStudentsInRestaurant-1){
+        if (numberOfStudentsRequests == Constants.N-1){
             return true;
         }
         return false;
@@ -324,10 +282,6 @@ public class Table {
         }
         return false;
     }
-
-
-
-
 
     public synchronized void presentTheBill() {
 
@@ -356,8 +310,8 @@ public class Table {
 
         numberOfPortionsDelivered++;
 
-        notify();
-        
+        notifyAll();
+        dishReady = true;
         try {
             wait();
         } catch (InterruptedException e) {

@@ -3,6 +3,7 @@ package sharedRegions;
 import java.util.Queue;
 
 import entities.*;
+import main.Constants;
 
 /**
  *    KITCHEN
@@ -27,7 +28,6 @@ public class Kitchen {
         if(chef.getChefState() != ChefStates.WAFOR) {
             chef.setChefState(ChefStates.WAFOR);
         }
-
         
         try{
             wait();
@@ -53,7 +53,6 @@ public class Kitchen {
     }
 
     public synchronized void alertTheWaiter() {
-        
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DLVPT);
 
@@ -95,16 +94,14 @@ public class Kitchen {
     }
 
     public synchronized void collectPortion() {
-        
         notify();
-
     }
 
     public synchronized void continuePreparation() {
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         numberOfCoursesToDeliver--;
-        numberOfPortionsToDeliver = numberOfStudentsInRestaurant;
+        numberOfPortionsToDeliver = Constants.N;
     }
 
     public synchronized void cleanUp() {

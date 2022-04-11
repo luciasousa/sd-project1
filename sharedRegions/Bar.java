@@ -23,10 +23,10 @@ public class Bar {
     //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
     private boolean orderDescribed;
-
+    private Table table;
     private final GeneralRepository repos;
 
-    public Bar(GeneralRepository repos){
+    public Bar(GeneralRepository repos, Table table){
         //initialize queue requests
         try {
             pendingServiceRequests = new MemFIFO(new Request[Constants.N]);
@@ -38,25 +38,29 @@ public class Bar {
         numberOfPendingServiceRequests = 0;
         numberOfStudentsInRestaurant = 0;
         orderDescribed = false;
-        this.repos=repos;
+        this.repos = repos;
+        this.table = table;
     }
 
-    public void enter() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        numberOfStudentsInRestaurant++;
-        Request r = new Request(numberOfStudentsInRestaurant-1, 'c');
-        try {
-            pendingServiceRequests.write(r);
-        } catch (MemException e) {
-            e.printStackTrace();
+    public int enter() {
+        synchronized(this){
+            numberOfStudentsInRestaurant++;
+            Student student = (Student) Thread.currentThread();
+            Request r = new Request(student.getStudentID(), 'c');
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
         }
         notify();
+        table.takeASeat();
+        return numberOfStudentsInRestaurant;
     }
 
     public synchronized void saluteTheClient() {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRSMN);
-        //numberOfStudentsInRestaurant++;
     }
 
     public synchronized void returnToBar() {
@@ -72,16 +76,20 @@ public class Bar {
             wait();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-        
+        }   
     }
 
     public synchronized void describeTheOrder() {
-        //Request r = Request(Constants.N-1,'o');
+        Student student = (Student) Thread.currentThread();
+        Request r = new Request(student.getStudentID(),'o');
+        try {
+            pendingServiceRequests.write(r);
+        } catch (MemException e) {
+            e.printStackTrace();
+        }
         notify();
     }
 
-    
     public synchronized char lookAround() {
         Waiter waiter = (Waiter) Thread.currentThread();
         if(waiter.getWaiterState() != WaiterStates.APPST) {

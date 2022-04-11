@@ -34,47 +34,32 @@ public class Waiter extends Thread {
 
         switch(s) {
 
-            case "c": //client arriving
-
+            case 'c': //client arriving
                 table.saluteTheClient();
-
                 bar.returnToBar();
             
-            case "o": //order ready to be collected
-
+            case 'o': //order ready to be collected
                 bar.getThePad();
                 table.getThePad();
-
                 kitchen.handTheNoteToChef(3,7);
-
                 bar.returnToBar();
             
-            case "p": //portion ready to be collected
-
+            case 'p': //portion ready to be collected
                 while(!table.haveAllClientsBeenServed()) {
-
                     bar.collectPortion();
                     kitchen.collectPortion();
                     table.deliverPortion();
-
                 }
-
                 bar.returnToBar();
 
-
-            case "b": //bill presentation
-
+            case 'b': //bill presentation
                 bar.prepareTheBill();
-
                 table.presentTheBill();
-
                 bar.returnToBar();
                 
-            case "g": //say goodbye to students
-
+            case 'g': //say goodbye to students
                 bar.sayGoodbye();
                 
         }
-
     }
 }

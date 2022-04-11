@@ -4,7 +4,7 @@ import commInfra.MemException;
 import commInfra.MemFIFO;
 import entities.*;
 import main.*;
-import genclass.*;
+//import genclass.*;
 
 /*
 General Repository.
@@ -32,9 +32,10 @@ public class GeneralRepository {
     //variables needed
     //private int numberOfStudentsInRestaurant;
     //with the IDs of the students in order by arrival
-    private MemFIFO<Integer> StudentsInTableQueue;
+    private MemFIFO<Integer> studentsInTableQueue;
     private int numberOfCourse;
     private int numberOfPortion;
+    private int numberOfStudentsInRestaurant;
 
     public GeneralRepository(String logFileName){
         this.logFileName = logFileName;
@@ -44,9 +45,9 @@ public class GeneralRepository {
             studentState[i] = StudentStates.GGTRT;
         }
 
-        MemFIFO<Integer> StudentsInTableQueue = null;
+        MemFIFO<Integer> studentsInTableQueue = null;
         try {
-            StudentsInTableQueue = new  MemFIFO(new Integer[Constants.N]);
+            studentsInTableQueue = new  MemFIFO(new Integer[Constants.N]);
         } catch (MemException e) {
             e.printStackTrace();
         }
