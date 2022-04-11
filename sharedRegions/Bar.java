@@ -22,9 +22,11 @@ public class Bar {
     private MemFIFO<Request> pendingServiceRequests;
     //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
-    private boolean orderDescribed;
     private Table table;
     private final GeneralRepository repos;
+
+    //flags
+    private boolean orderDescribed = false;
 
     public Bar(GeneralRepository repos, Table table){
         //initialize queue requests
@@ -40,54 +42,6 @@ public class Bar {
         orderDescribed = false;
         this.repos = repos;
         this.table = table;
-    }
-
-    public int enter() {
-        synchronized(this){
-            numberOfStudentsInRestaurant++;
-            Student student = (Student) Thread.currentThread();
-            Request r = new Request(student.getStudentID(), 'c');
-            try {
-                pendingServiceRequests.write(r);
-            } catch (MemException e) {
-                e.printStackTrace();
-            }
-        }
-        notify();
-        table.takeASeat();
-        return numberOfStudentsInRestaurant;
-    }
-
-    public synchronized void saluteTheClient() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.PRSMN);
-    }
-
-    public synchronized void returnToBar() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.APPST);
-    }
-
-    public synchronized void getThePad() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.TKODR);
-
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }   
-    }
-
-    public synchronized void describeTheOrder() {
-        Student student = (Student) Thread.currentThread();
-        Request r = new Request(student.getStudentID(),'o');
-        try {
-            pendingServiceRequests.write(r);
-        } catch (MemException e) {
-            e.printStackTrace();
-        }
-        notify();
     }
 
     public synchronized char lookAround() {
@@ -113,16 +67,73 @@ public class Bar {
         return request.getRequestType();
     }
 
-    //função da table, estudante acorda o waiter- waiter adiciona pedido à requests queue
-    public synchronized void callWaiter() {
-        /*numberOfPendingServiceRequests++;
-        Student student = (Student)Thread.currentThread();
-        int studentID = student.getStudentID();
-        Request r = new Request(studentID, 'o');
-        pendingServiceRequests.add(r);*/
-        notify();
+    public int enter() {
+        int studentID;
+        synchronized(this)
+        {
+            numberOfStudentsInRestaurant += 1;
+            Student student = (Student) Thread.currentThread();
+            studentID = student.getStudentID();
+            Request r = new Request(studentID, 'c');
+            numberOfPendingServiceRequests += 1;
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+            //acorda waiter preso em lookAround
+            notifyAll();
+        }
         
+        table.takeASeat(studentID);
+        return numberOfStudentsInRestaurant;
     }
+
+    public synchronized void returnToBar() {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.APPST);
+    }
+
+    public void callWaiter() {
+        //estudante adiciona pedido à requests queue e acorda o waiter
+        synchronized(this) 
+        {
+            Student student = (Student)Thread.currentThread();
+            int studentID = student.getStudentID();
+            Request r = new Request(studentID, 'o');
+            numberOfPendingServiceRequests++;
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+            //acordar o waiter preso em lookAround
+            notifyAll();
+        }
+        table.waitForPad();
+    }
+
+    public void getThePad() {
+        synchronized(this) 
+        {
+            Waiter waiter = (Waiter) Thread.currentThread();
+            waiter.setWaiterState(WaiterStates.TKODR);
+            //acorda o estudante
+            notifyAll();
+            //espera que ele descreva o pedido
+            while(!orderDescribed)
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        table.setIfWaiterHasPad(true);
+    }
+
+    public synchronized void setOrderDescribed(boolean b) { orderDescribed = b; }
 
     public synchronized void prepareTheBill() {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -132,24 +143,17 @@ public class Bar {
     public synchronized void sayGoodbye() {}
 
     public synchronized void alertTheWaiter() {
-    
-        notify();
+        notifyAll();
     }
 
     public synchronized void collectPortion() {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.WTFPT);
-
     }
 
     public synchronized void hasEverybodyFinished() {
         //retorna true quando o número de porções comidas é N
-        
-
     }
-
-    
-    
 }
 
 

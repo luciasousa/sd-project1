@@ -43,17 +43,13 @@ public class Student extends Thread {
         int orderOfArrival = bar.enter();
         table.readMenu();
 
-        if (orderOfArrival == 1) 
-        {
-            table.informCompanion();
-        } else
+        if (orderOfArrival == 1) table.informCompanion();
+        else
         {
             table.prepareTheOrder();
             while(!table.hasEverybodyChosen()) table.addUpOnesChoice();
-            table.callWaiter();
             bar.callWaiter();
             table.describeTheOrder();
-            bar.describeTheOrder();
             table.joinTheTalk();
         }
 
@@ -66,7 +62,8 @@ public class Student extends Thread {
 
         table.signalTheWaiter();
 
-        if(orderOfArrival == Constants.N) {
+        if(orderOfArrival == Constants.N) 
+        {
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
         }
@@ -83,7 +80,7 @@ public class Student extends Thread {
         //estudantes vão chegando ao restaurante aleatoriamente
         //estudantes estão no primeiro estado bloqueados
         //estudante fica sleep durante período random
-        try{ 
+        try { 
             Thread.sleep ((long) (1 + 40 * Math.random ()));
         }
         catch (InterruptedException e) {}

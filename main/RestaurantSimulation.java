@@ -50,8 +50,8 @@ public class RestaurantSimulation{
         }
 
         //atualizar variáveis do primeiro e último estudante
-        student[studentsOrder[0]].setStudentFirst(true);
-        student[studentsOrder[Constants.N-1]].setStudentLast(true);
+        /*student[studentsOrder[0]].setStudentFirst(true);
+        student[studentsOrder[Constants.N-1]].setStudentLast(true);*/
 
         //start simulation
         //lançar as threads do estudante e sleep durante um periodo random

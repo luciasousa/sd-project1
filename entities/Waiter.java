@@ -29,37 +29,38 @@ public class Waiter extends Thread {
 
     //fucntion run - thread 
     public void run() {
+        while(true)
+        {
+            char s = bar.lookAround();
 
-        char s = bar.lookAround();
-
-        switch(s) {
-
-            case 'c': //client arriving
-                table.saluteTheClient();
-                bar.returnToBar();
-            
-            case 'o': //order ready to be collected
-                bar.getThePad();
-                table.getThePad();
-                kitchen.handTheNoteToChef(3,7);
-                bar.returnToBar();
-            
-            case 'p': //portion ready to be collected
-                while(!table.haveAllClientsBeenServed()) {
-                    bar.collectPortion();
-                    kitchen.collectPortion();
-                    table.deliverPortion();
-                }
-                bar.returnToBar();
-
-            case 'b': //bill presentation
-                bar.prepareTheBill();
-                table.presentTheBill();
-                bar.returnToBar();
+            switch(s) 
+            {
+                case 'c': //client arriving
+                    table.saluteTheClient();
+                    bar.returnToBar();
                 
-            case 'g': //say goodbye to students
-                bar.sayGoodbye();
+                case 'o': //order ready to be collected
+                    bar.getThePad();
+                    kitchen.handTheNoteToChef(3,7);
+                    bar.returnToBar();
                 
+                case 'p': //portion ready to be collected
+                    while(!table.haveAllClientsBeenServed()) {
+                        bar.collectPortion();
+                        kitchen.collectPortion();
+                        table.deliverPortion();
+                    }
+                    bar.returnToBar();
+
+                case 'b': //bill presentation
+                    bar.prepareTheBill();
+                    table.presentTheBill();
+                    bar.returnToBar();
+                    
+                case 'g': //say goodbye to students
+                    bar.sayGoodbye();
+                    System.exit(0);
+            }
         }
     }
 }

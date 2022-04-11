@@ -2,9 +2,11 @@ package sharedRegions;
 
 import commInfra.MemException;
 import commInfra.MemFIFO;
-import entities.*;
-import main.*;
+import entities.ChefStates;
+import entities.StudentStates;
+import entities.WaiterStates;
 //import genclass.*;
+import main.Constants;
 
 /*
 General Repository.
