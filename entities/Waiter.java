@@ -12,10 +12,10 @@ public class Waiter extends Thread
     private Kitchen kitchen;
     private Table table;
 
-    public Waiter(Bar bar, Kitchen kitchen, Table table)
+    public Waiter(int waiterState, Bar bar, Kitchen kitchen, Table table)
     {
         //initial state
-        waiterState = WaiterStates.APPST;
+        this.waiterState = waiterState;
         this.bar = bar;
         this.kitchen = kitchen;
         this.table = table;
@@ -34,20 +34,22 @@ public class Waiter extends Thread
     //function run - thread 
     public void run() 
     {
+        System.out.println("waiter thread");
         while(true)
         {
             char s = bar.lookAround();
-
             switch(s) 
             {
                 case 'c': //client arriving
                     table.saluteTheClient();
                     bar.returnToBar();
+                    break;
                 
                 case 'o': //order ready to be collected
                     bar.getThePad();
                     kitchen.handTheNoteToChef();
                     bar.returnToBar();
+                    break;
                 
                 case 'p': //portion ready to be collected
                     while(!table.haveAllClientsBeenServed()) 
@@ -56,11 +58,13 @@ public class Waiter extends Thread
                         table.deliverPortion();
                         bar.returnToBar();
                     }
+                    break;
 
                 case 'b': //bill presentation
                     bar.prepareTheBill();
                     table.presentTheBill();
                     bar.returnToBar();
+                    break;
                     
                 case 'g': //say goodbye to students
                     bar.sayGoodbye();

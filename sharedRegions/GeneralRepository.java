@@ -5,8 +5,9 @@ import commInfra.MemFIFO;
 import entities.ChefStates;
 import entities.StudentStates;
 import entities.WaiterStates;
-//import genclass.*;
 import main.Constants;
+import genclass.GenericIO;
+import genclass.TextFile;
 
 /*
 General Repository.
@@ -29,7 +30,7 @@ public class GeneralRepository {
     private int waiterState;
 
     //states of the students
-    private int[] studentState;
+    private int[] studentState = new int[Constants.N];
 
     //variables needed
     //private int numberOfStudentsInRestaurant;
@@ -87,61 +88,89 @@ public class GeneralRepository {
         }
 
         switch (chefState){
-            case ChefStates.WAFOR: lineStatus += "WAFOR ";
+            case 0: lineStatus += " WAFOR ";
                                                 break;
-            case ChefStates.PRPCS: lineStatus += "PRPCS ";
+            case 1: lineStatus += " PRPCS ";
                                                 break;
-            case ChefStates.DSHPT: lineStatus += "DSHPT ";
+            case 2: lineStatus += " DSHPT ";
                                                 break;
-            case ChefStates.DLVPT: lineStatus += "DLVPT ";
+            case 3: lineStatus += " DLVPT ";
                                                 break;
-            case ChefStates.CLSSV: lineStatus += "CLSSV ";
+            case 4: lineStatus += " CLSSV ";
                                                 break;
         }
    
         switch (waiterState){
-            case WaiterStates.APPST: lineStatus += "APPST ";
+            case 0: lineStatus += " APPST ";
                                                 break;
-            case WaiterStates.PRSMN: lineStatus += "PRSMN ";
+            case 1: lineStatus += " PRSMN ";
                                                 break;
-            case WaiterStates.TKODR: lineStatus += "TKODR ";
+            case 2: lineStatus += " TKODR ";
                                                 break;
-            case WaiterStates.PCODR: lineStatus += "PCODR ";
+            case 3: lineStatus += " PCODR ";
                                                 break;      
-            case WaiterStates.WTFPT: lineStatus += "WTFPT ";
+            case 4: lineStatus += " WTFPT ";
                                                 break;
-            case WaiterStates.PRCBL: lineStatus += "PRCBL ";
+            case 5: lineStatus += " PRCBL ";
                                                 break;
-            case WaiterStates.RECPM: lineStatus += "RECPM ";
+            case 6: lineStatus += " RECPM ";
                                                 break;                              
         }
    
         for (int i = 0; i < Constants.N; i++)
             switch (studentState[i]){
-                case StudentStates.GGTRT:  lineStatus += "GGTRT ";
+                case 0:  lineStatus += " GGTRT ";
                                                 break;
-                case StudentStates.TKSTT:  lineStatus += "TKSTT ";
+                case 1:  lineStatus += " TKSTT ";
                                                 break;
-                case StudentStates.SELCS:  lineStatus += "SELCS ";
+                case 2:  lineStatus += " SELCS ";
                                                 break;
-                case StudentStates.OGODR:  lineStatus += "OGODR ";
+                case 3:  lineStatus += " OGODR ";
                                                 break;
-                case StudentStates.CHTWC:  lineStatus += "CHTWC ";
+                case 4:  lineStatus += " CHTWC ";
                                                 break;
-                case StudentStates.EJYML:  lineStatus += "EJYML ";
+                case 5:  lineStatus += " EJYML ";
                                                 break;
-                case StudentStates.PYTBL:  lineStatus += "PYTBL ";
+                case 6:  lineStatus += " PYTBL ";
                                                 break;
-                case StudentStates.GGHOM:  lineStatus += "GGHOM ";
+                case 7:  lineStatus += " GGHOM ";
                                                 break;
             }
        
-        lineStatus += " "+String.format("%2d", numberOfCourse)+"  "+String.format("%2d", numberOfPortion);
-        for(int i =0; i<Constants.N; i++){
-            lineStatus += " "+ String.format("%2d",StudentsInTableQueue.read());
+        lineStatus += " "+String.format("%7d", numberOfCourse)+"  "+String.format("%7d", numberOfPortion);
+
+        /*for(int i =0; i<Constants.N; i++){
+            try {
+                studentsInTableQueue.write(i);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
         }
+
+        for(int i =0; i<Constants.N; i++){
+            try {
+                lineStatus += " "+ String.format("%2d",studentsInTableQueue.read());
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+        }*/
         log.writelnString (lineStatus);
         if (!log.close ()){ 
+            GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
+            System.exit (1);
+        }
+    }
+
+    public void printSumUp() {
+        TextFile log = new TextFile ();  
+
+        if (!log.openForAppending (".", logFileName))
+            { GenericIO.writelnString ("The operation of opening for appending the file " + logFileName + " failed!");
+                System.exit (1);
+            }
+        
+        if (!log.close ())
+        { 
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }

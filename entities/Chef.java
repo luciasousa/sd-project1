@@ -13,10 +13,10 @@ public class Chef extends Thread
     private Bar bar;
     private boolean firstCourse = true;
 
-    public Chef(Kitchen kitchen, Bar bar)
+    public Chef(int chefState, Kitchen kitchen, Bar bar)
     {
         //initial state
-        chefState = ChefStates.WAFOR;
+        this.chefState = chefState;
         this.kitchen = kitchen;
         this.bar = bar;
     }
@@ -34,6 +34,7 @@ public class Chef extends Thread
     //function run - thread 
     public void run() 
     {
+        System.out.println("chef thread");
         kitchen.watchTheNews();
         kitchen.startPreparation();
         do 

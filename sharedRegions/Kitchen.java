@@ -29,16 +29,17 @@ public class Kitchen
     //flags
     private boolean isNoteAvailable = false;
     private boolean isPortionDelivered = false;
+    private boolean preparationStarted;
 
-    public Kitchen((GeneralRepository repos)
+    public Kitchen(GeneralRepository repos)
     {
         firstCourse = true;
         this.repos = repos;
     }
 
-    public setFirstCourse(boolean b) { firstCourse = b; }
+    public void setFirstCourse(boolean b) { firstCourse = b; }
 
-    public getFirstCourse() { return firstCourse; }
+    public boolean getFirstCourse() { return firstCourse; }
 
     public synchronized void watchTheNews() 
     {
@@ -53,8 +54,8 @@ public class Kitchen
         {
             try{
                 wait();
-            } catch(Exception e) {
-                System.out.println("Thread was interrupted");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

@@ -1,5 +1,6 @@
 package entities;
 
+import javafx.scene.layout.BackgroundFill;
 import main.Constants;
 import sharedRegions.*;
 
@@ -14,11 +15,11 @@ public class Student extends Thread
     private final Bar bar;
 
 
-    public Student(int studentID, Table table, Bar bar)
+    public Student(int studentID,int studentState, Table table, Bar bar)
     {
         //initial state
         this.studentID = studentID;
-        studentState = StudentStates.GGTRT;
+        this.studentState = studentState;
         this.table = table;
         this.bar=bar;
     }
@@ -42,15 +43,17 @@ public class Student extends Thread
     //function run - thread
     public void run() 
     {
+        System.out.println("student thread");
         walkABit();
         int orderOfArrival = bar.enter();
         table.readMenu();
-
-        if (orderOfArrival == 1) table.informCompanion();
+        //bar.enter retorna numero de estudantes, o primeiro entra é 1 vai preparar order
+        if (orderOfArrival != 1) table.informCompanion();
         else
         {
             table.prepareTheOrder();
             while(!table.hasEverybodyChosen()) table.addUpOnesChoice();
+            System.out.println("student is going to call the waiter");
             bar.callWaiter();
             table.describeTheOrder();
             table.joinTheTalk();
@@ -63,14 +66,14 @@ public class Student extends Thread
             while(table.hasEverybodyFinished());
         }
 
-        table.signalTheWaiter();
+        bar.signalTheWaiter();
 
         if(orderOfArrival == Constants.N) 
         {
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
         }
-        table.exit();
+        bar.exit();
     }
 
     /**

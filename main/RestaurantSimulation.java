@@ -24,49 +24,50 @@ public class RestaurantSimulation{
         System.out.println("The Restaurant Simulation");
     
         //initialize problem
-		
-        //array com a ordem de chegada dos estudantes
-        int[] studentsOrder;
-
-        //inicializar array [1,2...,N]
-        studentsOrder = new int[Constants.N];
-        Arrays.setAll(studentsOrder, i -> i + 1);
-        //gerar array de 1 a N com ordem alatória
-        //studentsOrder = [1,2,3,...,N] to a random order
-        Random rand = new Random();
-        for (int i = 0; i < studentsOrder.length; i++) {
-			int randomIndexToSwap = rand.nextInt(studentsOrder.length);
-			int temp = studentsOrder[randomIndexToSwap];
-			studentsOrder[randomIndexToSwap] = studentsOrder[i];
-			studentsOrder[i] = temp;
-		}
-
-        for(int i=0; i<Constants.N; i++){
-            //definir o id do estudante
-            student[studentsOrder[i]].setStudentID(studentsOrder[i]);
-            int studentID = student[studentsOrder[i]].getStudentID();
-            //definir o primeiro estado do estudante, GGTRT
-            student[studentID].setStudentState(StudentStates.GGTRT);
-        }
-
-        //atualizar variáveis do primeiro e último estudante
-        /*student[studentsOrder[0]].setStudentFirst(true);
-        student[studentsOrder[Constants.N-1]].setStudentLast(true);*/
 
         //start simulation
-        //lançar as threads do estudante e sleep durante um periodo random
-        //Thread.sleep ((long) (1 + 100 * Math.random ()));
-        for(int i=0; i<Constants.N; i++){
-            try {
-                student[i].wait((long) (1 + 100 * Math.random ()));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } 
-        }
+        
+        repository = new GeneralRepository("logger");
+        kitchen = new Kitchen(repository);
+        table = new Table(repository);
+        bar = new Bar(repository,table, kitchen);
         
 
-        //wait for the simulation to end
+        chef = new Chef(ChefStates.WAFOR, kitchen, bar);
+        waiter = new Waiter(WaiterStates.APPST, bar, kitchen, table);
+        for (int i = 0; i < Constants.N; i++)
+            student[i] = new Student(i,StudentStates.GGTRT, table, bar);
+        
+        /* start of the simulation */
+        chef.start();
+        waiter.start();
+        for (int i = 0; i < Constants.N; i++)
+        	student[i].start();
+
+        /* waiting for the end of the simulation */
+        for (int i = 0; i < Constants.N; i++){ 
+            try{ 
+                student[i].join ();
+            }
+            catch (InterruptedException e) {}
+            System.out.println("The Student "+(i)+" just terminated");
+        }
+        
+        try {
+			chef.join();
+		} catch (InterruptedException e) {}
+        System.out.println("The chef has terminated");
+        
+        try {
+        	waiter.join();	
+		} catch (InterruptedException e) {}
+        System.out.println("The waiter has terminated");
+        
     
+        System.out.println("End of the Simulation");
+        
+        //wait for the simulation to end
+        repository.printSumUp();
     
     }
 }

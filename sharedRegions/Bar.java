@@ -24,13 +24,14 @@ public class Bar
     //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
     private Table table;
+    private Kitchen kitchen;
     private final GeneralRepository repos;
 
     //flags
     private boolean orderDescribed = false;
     private boolean haveAllPortionsBeenDelivered = false;
 
-    public Bar(GeneralRepository repos, Table table)
+    public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
         //initialize queue requests
         try {
@@ -53,6 +54,7 @@ public class Bar
         if(waiter.getWaiterState() != WaiterStates.APPST) {
             waiter.setWaiterState(WaiterStates.APPST);
         }
+        System.out.println("waiter looking");
 
         while(numberOfPendingServiceRequests == 0) {
             try {
@@ -76,11 +78,12 @@ public class Bar
         int studentID;
         synchronized(this)
         {
-            numberOfStudentsInRestaurant += 1;
+            numberOfStudentsInRestaurant++;
             Student student = (Student) Thread.currentThread();
             studentID = student.getStudentID();
+            System.out.println("student enters");
             Request r = new Request(studentID, 'c');
-            numberOfPendingServiceRequests += 1;
+            numberOfPendingServiceRequests++;
             try {
                 pendingServiceRequests.write(r);
             } catch (MemException e) {
@@ -103,6 +106,7 @@ public class Bar
     public void callWaiter() 
     {
         //estudante adiciona pedido à requests queue e acorda o waiter
+        System.out.println("waiter was called");
         synchronized(this) 
         {
             Student student = (Student)Thread.currentThread();
@@ -126,6 +130,7 @@ public class Bar
         {
             Waiter waiter = (Waiter) Thread.currentThread();
             waiter.setWaiterState(WaiterStates.TKODR);
+            System.out.printf("waiter get the pad, state: %d",waiter.getWaiterState());
             //acorda o estudante
             notifyAll();
             //espera que ele descreva o pedido
@@ -141,15 +146,7 @@ public class Bar
         table.setIfWaiterHasPad(true);
     }
 
-    public synchronized void setOrderDescribed(boolean b) { orderDescribed = b; }
-
-    public synchronized void prepareTheBill() 
-    {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.PRCBL);
-    }
-
-    public synchronized void sayGoodbye() {}
+    //public synchronized void setOrderDescribed(boolean b) { orderDescribed = b; }
 
     public void alertTheWaiter() 
     {
@@ -191,6 +188,71 @@ public class Bar
     public synchronized void hasEverybodyFinished() 
     {
         //retorna true quando o número de porções comidas é N
+    }
+
+    //signal the waiter quando os estudantes acabaram de comer
+    public void signalTheWaiter() 
+    {
+        //estudante adiciona pedido à requests queue e acorda o waiter
+        synchronized(this) 
+        {
+            Student student = (Student)Thread.currentThread();
+            int studentID = student.getStudentID();
+            //bill presentation
+            Request r = new Request(studentID, 'b');
+            numberOfPendingServiceRequests += 1;
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+            //acordar o waiter preso em lookAround
+            notifyAll();
+        }
+        table.allFinished();
+    }
+
+    public synchronized void prepareTheBill() 
+    {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.PRCBL);
+
+    }
+
+    public int exit() 
+    {
+        int studentID;
+        synchronized(this)
+        {
+            Student student = (Student) Thread.currentThread();
+            studentID = student.getStudentID();
+            //say goodbye
+            Request r = new Request(studentID, 'g');
+            numberOfPendingServiceRequests += 1;
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+            //acorda waiter preso em lookAround
+            notifyAll();
+        }
+        table.goingHome(studentID);
+        //retorna a posição de chegada de cada estudante
+        return numberOfStudentsInRestaurant;
+    }
+
+
+    public synchronized void sayGoodbye() {
+        numberOfStudentsInRestaurant--;
+        // transition occurs when the last student has left the restaurant
+        while(numberOfStudentsInRestaurant!=0){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
 
