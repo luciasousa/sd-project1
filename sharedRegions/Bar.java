@@ -15,7 +15,8 @@ import entities.*;
  *    blocking point for the Waiter, where he waits for the Chef to signal
  */
 
-public class Bar {
+public class Bar 
+{
     //número de serviços pendentes
     private int numberOfPendingServiceRequests;
     //fila com os serviços pendentes
@@ -27,8 +28,10 @@ public class Bar {
 
     //flags
     private boolean orderDescribed = false;
+    private boolean haveAllPortionsBeenDelivered = false;
 
-    public Bar(GeneralRepository repos, Table table){
+    public Bar(GeneralRepository repos, Table table)
+    {
         //initialize queue requests
         try {
             pendingServiceRequests = new MemFIFO(new Request[Constants.N]);
@@ -44,7 +47,8 @@ public class Bar {
         this.table = table;
     }
 
-    public synchronized char lookAround() {
+    public synchronized char lookAround() 
+    {
         Waiter waiter = (Waiter) Thread.currentThread();
         if(waiter.getWaiterState() != WaiterStates.APPST) {
             waiter.setWaiterState(WaiterStates.APPST);
@@ -67,7 +71,8 @@ public class Bar {
         return request.getRequestType();
     }
 
-    public int enter() {
+    public int enter() 
+    {
         int studentID;
         synchronized(this)
         {
@@ -84,24 +89,26 @@ public class Bar {
             //acorda waiter preso em lookAround
             notifyAll();
         }
-        
         table.takeASeat(studentID);
+        //retorna a posição de chegada de cada estudante
         return numberOfStudentsInRestaurant;
     }
 
-    public synchronized void returnToBar() {
+    public synchronized void returnToBar() 
+    {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.APPST);
     }
 
-    public void callWaiter() {
+    public void callWaiter() 
+    {
         //estudante adiciona pedido à requests queue e acorda o waiter
         synchronized(this) 
         {
             Student student = (Student)Thread.currentThread();
             int studentID = student.getStudentID();
             Request r = new Request(studentID, 'o');
-            numberOfPendingServiceRequests++;
+            numberOfPendingServiceRequests += 1;
             try {
                 pendingServiceRequests.write(r);
             } catch (MemException e) {
@@ -113,7 +120,8 @@ public class Bar {
         table.waitForPad();
     }
 
-    public void getThePad() {
+    public void getThePad() 
+    {
         synchronized(this) 
         {
             Waiter waiter = (Waiter) Thread.currentThread();
@@ -135,23 +143,53 @@ public class Bar {
 
     public synchronized void setOrderDescribed(boolean b) { orderDescribed = b; }
 
-    public synchronized void prepareTheBill() {
+    public synchronized void prepareTheBill() 
+    {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRCBL);
     }
 
     public synchronized void sayGoodbye() {}
 
-    public synchronized void alertTheWaiter() {
-        notifyAll();
+    public void alertTheWaiter() 
+    {
+        synchronized(this) 
+        {
+            //chef's ID is Number of students + 1
+            Request r = new Request(Constants.N + 1, 'p');
+            numberOfPendingServiceRequests += 1;
+            try {
+                pendingServiceRequests.write(r);
+            } catch (MemException e) {
+                e.printStackTrace();
+            }
+
+            //wake up the waiter stuck in lookAround 
+            notifyAll();
+        }
+        kitchen.chefWaitForCollection();
     }
 
-    public synchronized void collectPortion() {
-        Waiter waiter = (Waiter) Thread.currentThread();
-        waiter.setWaiterState(WaiterStates.WTFPT);
+    public void collectPortion() 
+    {
+        synchronized(this) 
+        {
+            Waiter waiter = (Waiter) Thread.currentThread();
+            waiter.setWaiterState(WaiterStates.WTFPT);
+            
+            /*while(!haveAllPortionsBeenDelivered) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }*/
+        }
+        kitchen.prepareNextPortion();
     }
 
-    public synchronized void hasEverybodyFinished() {
+    public synchronized void hasEverybodyFinished() 
+    {
         //retorna true quando o número de porções comidas é N
     }
 }

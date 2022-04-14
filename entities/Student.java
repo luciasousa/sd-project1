@@ -3,7 +3,8 @@ package entities;
 import main.Constants;
 import sharedRegions.*;
 
-public class Student extends Thread {
+public class Student extends Thread 
+{
     
     //identify the student
     //id + the state the student is in
@@ -13,7 +14,8 @@ public class Student extends Thread {
     private final Bar bar;
 
 
-    public Student(int studentID, Table table, Bar bar){
+    public Student(int studentID, Table table, Bar bar)
+    {
         //initial state
         this.studentID = studentID;
         studentState = StudentStates.GGTRT;
@@ -38,7 +40,8 @@ public class Student extends Thread {
     }
 
     //function run - thread
-    public void run() {
+    public void run() 
+    {
         walkABit();
         int orderOfArrival = bar.enter();
         table.readMenu();

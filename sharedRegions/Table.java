@@ -63,11 +63,13 @@ public class Table
         this.bar = bar;
     }
 
+    //função chamada pelo Bar
     public synchronized void takeASeat(int studentID) 
     {
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.TKSTT);
         menuRead = false;
+
         while(student.getStudentID() != studentID) 
         {
             try {
@@ -163,6 +165,7 @@ public class Table
         }
     }
     
+    //função chamada pelo Bar
     public synchronized void waitForPad() 
     {     
         //adormecer o estudante até o waiter ter o bloco
@@ -176,6 +179,7 @@ public class Table
         }
     }
 
+    //função chamada pelo Bar
     public synchronized void setIfWaiterHasPad(boolean b) { waiterHasThePad = b; }
 
     public void describeTheOrder() 
@@ -214,7 +218,6 @@ public class Table
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
     public synchronized void endEating() 
@@ -224,7 +227,6 @@ public class Table
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
-
     }
 
     public synchronized void signalTheWaiter() 
@@ -232,7 +234,6 @@ public class Table
         //acordar o waiter para lhe darem o pedido
         notifyAll();
         //adormecer o estudante até waiter voltar para o bar
-
         //TODO: adicionar flag no bar
 
         while(!waiterHasReturnedToTheBar)
@@ -255,7 +256,6 @@ public class Table
 
     public synchronized void honourTheBill() 
     {
-
         //mantém no estado PYTBL até conta estar paga
         //se paga passa para estado GGHOM
         if(billPaid)
@@ -263,7 +263,6 @@ public class Table
             Student student = ((Student) Thread.currentThread());
             student.setStudentState(StudentStates.GGHOM);
         }
-
     }
 
     public synchronized void exit() 
@@ -291,20 +290,17 @@ public class Table
 
     public synchronized boolean hasEverybodyChosen() 
     {
-        //retorna true quando o número de pedidos é N
         if (numberOfStudentsRequests == Constants.N) return true; else return false;
     }
 
     public synchronized boolean hasEverybodyFinished() 
     {
-        //retorna true quando o número de porções comidas é N
         if(numberOfPortionsEaten == Constants.N) return true; else return false;
     }
 
     public synchronized void presentTheBill() 
     {
         //TODO: alterar estado do waiter
-
         //acordar o waiter para ir à mesa
         notifyAll();
 
@@ -327,8 +323,10 @@ public class Table
     public synchronized void deliverPortion() 
     {
         numberOfPortionsDelivered++;
-        notifyAll();
         dishReady = true;
+        
+        //acorda um dos estudantes
+        notify();
         try {
             wait();
         } catch (InterruptedException e) {
