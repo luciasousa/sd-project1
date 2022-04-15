@@ -18,18 +18,19 @@ import entities.*;
 public class Bar 
 {
     //número de serviços pendentes
-    private int numberOfPendingServiceRequests;
+    private int numberOfPendingServiceRequests=0;
     //fila com os serviços pendentes
     private MemFIFO<Request> pendingServiceRequests;
     //número de estudantes no restaurante
-    private int numberOfStudentsInRestaurant;
+    private int numberOfStudentsInRestaurant=0;
     private Table table;
     private Kitchen kitchen;
     private final GeneralRepository repos;
 
-    //flags
+    private int studentsArrival[] = new int [Constants.N];
     private boolean orderDescribed = false;
     private boolean haveAllPortionsBeenDelivered = false;
+    private boolean firstStudent=false;
 
     public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
@@ -41,9 +42,7 @@ public class Bar
             e.printStackTrace();
         }
         //initialize other variables
-        numberOfPendingServiceRequests = 0;
-        numberOfStudentsInRestaurant = 0;
-        orderDescribed = false;
+        
         this.repos = repos;
         this.table = table;
     }
@@ -73,14 +72,19 @@ public class Bar
         return request.getRequestType();
     }
 
-    public int enter() 
+    public int[] enter() 
     {
         int studentID;
         synchronized(this)
         {
-            numberOfStudentsInRestaurant++;
+            //não podemos usar variável do numero de estudantes para operar sobre o primeiro
+            
+            //if(numberOfStudentsInRestaurant==0) firstStudent=true; else firstStudent=false;
+            
             Student student = (Student) Thread.currentThread();
             studentID = student.getStudentID();
+            studentsArrival[numberOfStudentsInRestaurant] = studentID;
+            numberOfStudentsInRestaurant++;
             System.out.println("student enters");
             Request r = new Request(studentID, 'c');
             numberOfPendingServiceRequests++;
@@ -94,7 +98,7 @@ public class Bar
         }
         table.takeASeat(studentID);
         //retorna a posição de chegada de cada estudante
-        return numberOfStudentsInRestaurant;
+        return studentsArrival;
     }
 
     public synchronized void returnToBar() 

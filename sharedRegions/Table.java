@@ -20,13 +20,13 @@ public class Table
     //lista com o ID dos estudantes pela ordem de chegada à mesa
     //private Queue<Integer> studentsInTableQueue;
     //número de porções que já foram entregues
-    private int numberOfPortionsDelivered;
+    private int numberOfPortionsDelivered=0;
     //número de porções que já foram comidas
-    private int numberOfPortionsEaten;
+    private int numberOfPortionsEaten=0;
     private boolean dishReady = false;
     //lista com pedidos dos estudantes
     //private Queue<Request> studentsRequestsQueue;
-    private int numberOfStudentsRequests;
+    private int numberOfStudentsRequests=1;
 
     //array de estudantes
     //private Student[] student;
@@ -46,7 +46,7 @@ public class Table
     private boolean waiterHasThePad = false;
     private boolean isBillDelivered = false;
     private boolean isBillPrepared = false;
-    private boolean studentHasPaid;
+    private boolean studentHasPaid=false;
 
     public Table(GeneralRepository repos)
     {
@@ -58,10 +58,8 @@ public class Table
 
         //inicializar variáveis da table
         //studentsInTableQueue = new LinkedList<>();
-        numberOfPortionsDelivered = 0;
-        numberOfPortionsEaten = 0;
+        
         //studentsRequestsQueue = new LinkedList<>();
-        numberOfStudentsRequests = 0;
         this.repos = repos;
         //this.bar = bar;
     }
@@ -144,6 +142,7 @@ public class Table
         System.out.printf("student %d inform companion, state: %d\n", student.getStudentID(), student.getStudentState());
         //desbloquear o 1º estudante
         wasInformed = true;
+        numberOfStudentsRequests += 1;
         notifyAll();
 
         while(!dishReady) 
@@ -160,7 +159,7 @@ public class Table
     {
         //primeiro estudante adiciona pedidos dos restantes
         //primeiro estudante mantém-se no estado OGODR
-        numberOfStudentsRequests += 1;
+        
         wasInformed = false;
         //espera por ser desbloqueado pelo informCompanion
         while(!wasInformed)

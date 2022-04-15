@@ -45,10 +45,9 @@ public class Student extends Thread
     {
         System.out.println("student thread");
         walkABit();
-        int orderOfArrival = bar.enter();
+        int[] orderOfArrival = bar.enter();
         table.readMenu();
-        //bar.enter retorna numero de estudantes, o primeiro entra é 1 vai preparar order
-        if (orderOfArrival != 1) table.informCompanion();
+        if (orderOfArrival[0]!=studentID) table.informCompanion();
         else
         {
             table.prepareTheOrder();
@@ -68,7 +67,7 @@ public class Student extends Thread
 
         bar.signalTheWaiter();
 
-        if(orderOfArrival == Constants.N) 
+        if(orderOfArrival[Constants.N] == studentID) 
         {
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
