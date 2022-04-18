@@ -1,9 +1,6 @@
 package sharedRegions;
 
-import java.util.Queue;
-
 import entities.*;
-import libraries.Request;
 import main.Constants;
 
 /**
@@ -18,11 +15,8 @@ import main.Constants;
 
 public class Kitchen 
 {
-    
-    private Queue<Integer> portionsQueue;
     private int numberOfCoursesToDeliver;
     private int numberOfPortionsToDeliver;
-    private int numberOfStudentsInRestaurant;
     private final GeneralRepository repos;
     private boolean firstCourse;
 
@@ -49,7 +43,7 @@ public class Kitchen
         {
             chef.setChefState(ChefStates.WAFOR);
         }
-
+        System.out.println("chef watches the news");
         while(!isNoteAvailable)
         {
             try{
@@ -58,6 +52,7 @@ public class Kitchen
                 e.printStackTrace();
             }
         }
+        System.out.println("chef has note");
     }
     
     public synchronized void handTheNoteToChef() 
@@ -68,7 +63,6 @@ public class Kitchen
         System.out.println("waiter hands the note to chef");
         this.numberOfCoursesToDeliver = Constants.M;
         this.numberOfPortionsToDeliver = Constants.N;
-        this.numberOfStudentsInRestaurant = Constants.N;
         isNoteAvailable = true;
 
         //acorda chefe que está em watchTheNews
@@ -90,7 +84,8 @@ public class Kitchen
     {
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DLVPT);
-
+        System.out.println("chef waits for waiter to collect portion");
+        
         //chef espera pela entrega do waiter
         while(!isPortionDelivered)
         {
@@ -104,6 +99,7 @@ public class Kitchen
 
     public synchronized void startPreparation() 
     {
+        System.out.println("chef starts preparation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         numberOfCoursesToDeliver--;
@@ -115,6 +111,7 @@ public class Kitchen
 
     public synchronized void proceedToPresentation() 
     {
+        System.out.println("chef proceeds to presentation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         numberOfPortionsToDeliver--;
@@ -139,6 +136,7 @@ public class Kitchen
 
     public synchronized void haveNextPortionReady() 
     {
+        System.out.println("chef have next portion ready");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         numberOfPortionsToDeliver--;
@@ -146,6 +144,7 @@ public class Kitchen
 
     public synchronized void continuePreparation() 
     {
+        System.out.println("chef continues preparation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         numberOfCoursesToDeliver--;
@@ -154,6 +153,7 @@ public class Kitchen
 
     public synchronized void cleanUp() 
     {
+        System.out.println("chef cleans up");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.CLSSV);
     }

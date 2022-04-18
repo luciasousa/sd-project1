@@ -1,6 +1,6 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "c:\\Users\\User\\Downloads\\genclass.jar"
+        "C:\\Users\\fran_\\Downloads\\genclass.jar"
     ]
 }

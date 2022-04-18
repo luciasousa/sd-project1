@@ -1,4 +1,5 @@
 package entities;
+import libraries.Request;
 import sharedRegions.*;
 
 public class Waiter extends Thread 
@@ -37,16 +38,16 @@ public class Waiter extends Thread
         System.out.println("waiter thread");
         while(true)
         {
-            char s = bar.lookAround();
-            switch(s) 
+            Request r = bar.lookAround();
+            switch(r.getRequestType()) 
             {
                 case 'c': //client arriving
-                    table.saluteTheClient();
+                    table.saluteTheClient(r.getRequestID());
                     bar.returnToBar();
                     break;
                 
                 case 'o': //order ready to be collected
-                    bar.getThePad();
+                    table.getThePad();
                     kitchen.handTheNoteToChef();
                     bar.returnToBar();
                     break;

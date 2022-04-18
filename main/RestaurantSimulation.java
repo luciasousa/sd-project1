@@ -1,14 +1,12 @@
 package main;
 
-import java.util.*;
-
 import entities.*;
 import sharedRegions.*;
 
-public class RestaurantSimulation{
-
-    
-    public static void main(String [] args){
+public class RestaurantSimulation
+{
+    public static void main(String [] args)
+    {
 
         //instantiate entities
         Chef chef;
@@ -30,7 +28,7 @@ public class RestaurantSimulation{
         repository = new GeneralRepository("logger");
         kitchen = new Kitchen(repository);
         table = new Table(repository);
-        bar = new Bar(repository,table, kitchen);
+        bar = new Bar(repository, table, kitchen);
         
 
         chef = new Chef(ChefStates.WAFOR, kitchen, bar);
@@ -45,7 +43,8 @@ public class RestaurantSimulation{
         	student[i].start();
 
         /* waiting for the end of the simulation */
-        for (int i = 0; i < Constants.N; i++){ 
+        for (int i = 0; i < Constants.N; i++)
+        { 
             try{ 
                 student[i].join ();
             }

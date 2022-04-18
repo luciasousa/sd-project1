@@ -11,7 +11,6 @@ public class Chef extends Thread
     private int chefState;
     private Kitchen kitchen;
     private Bar bar;
-    private boolean firstCourse = true;
 
     public Chef(int chefState, Kitchen kitchen, Bar bar)
     {

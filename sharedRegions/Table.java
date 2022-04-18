@@ -1,8 +1,7 @@
 package sharedRegions;
-import libraries.*;
 import main.Constants;
-
-import java.util.*;
+import commInfra.MemException;
+import commInfra.MemFIFO;
 import entities.*;
 
 /**
@@ -36,8 +35,8 @@ public class Table
     //flags
     //flag para indicar que conta foi paga
     private boolean billPaid = false;
-    //flag para indicar que estudante leu o menu
-    private boolean menuRead = false;
+    //flag para indicar quais estudantes leram o menu
+    private boolean[] menuRead;
     //flag para indicar que estudante informou
     private boolean wasInformed = false;
     //flag para indicar se waiter voltou ao bar
@@ -47,6 +46,9 @@ public class Table
     private boolean isBillDelivered = false;
     private boolean isBillPrepared = false;
     private boolean studentHasPaid=false;
+    private int lastStudentToTakeASeat;
+    private boolean[] clientsSaluted;
+    private boolean orderDescribed;
 
     public Table(GeneralRepository repos)
     {
@@ -61,19 +63,18 @@ public class Table
         
         //studentsRequestsQueue = new LinkedList<>();
         this.repos = repos;
-        //this.bar = bar;
+        clientsSaluted = new boolean[Constants.N];
+        menuRead = new boolean[Constants.N];
     }
 
     //função chamada pelo Bar
-    public synchronized void takeASeat(int studentID) 
+    public synchronized void takeASeat() 
     {
-        
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.TKSTT);
         System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
-        menuRead = false;
 
-        while(student.getStudentID() != studentID) 
+        while(!clientsSaluted[student.getStudentID()]) 
         {
             try {
                 wait();
@@ -83,16 +84,17 @@ public class Table
         }
     }
 
-    public synchronized void saluteTheClient() 
+    public synchronized void saluteTheClient(int studentID) 
     {
-        //desbloqueia estudante preso em takeASeat
-        notifyAll();
-
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRSMN);
-        System.out.printf("waiter salute the client, state: %d\n", waiter.getWaiterState());
+        System.out.printf("waiter salute the client %d, state: %d\n", studentID, waiter.getWaiterState());
+        
+        //desbloqueia estudante preso em takeASeat
+        clientsSaluted[studentID] = true;
+        notifyAll();
         //adormecer o waiter até o estudante ler o menu
-        while(!menuRead)
+        while(!menuRead[studentID])
         {
             try {
                 wait();
@@ -106,9 +108,10 @@ public class Table
     {
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.SELCS);
-        System.out.printf("student %d read menu, state: %d\n", student.getStudentID(), student.getStudentState());
+        int studentID = student.getStudentID();
+        System.out.printf("student %d read menu, state: %d\n", studentID, student.getStudentState());
         //desbloqueia waiter preso em saluteTheClient
-        menuRead = true;
+        menuRead[studentID] = true;
         notifyAll();
     }
 
@@ -161,6 +164,8 @@ public class Table
         //primeiro estudante mantém-se no estado OGODR
         
         wasInformed = false;
+        Student student = (Student) Thread.currentThread();
+        System.out.printf("student %d has been informed\n", student.getStudentID());
         //espera por ser desbloqueado pelo informCompanion
         while(!wasInformed)
         {
@@ -184,29 +189,41 @@ public class Table
                 e.printStackTrace();
             }
         }
+        System.out.println("waiter has the pad");
     }
 
-    //função chamada pelo Bar
-    public synchronized void setIfWaiterHasPad(boolean b) { waiterHasThePad = b; }
+    public synchronized void getThePad() 
+    { 
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.TKODR);
+        System.out.printf("waiter get the pad, state: %d\n", waiter.getWaiterState());
 
-    public void describeTheOrder() 
-    {
-        synchronized(this) 
+        //acorda o estudante
+        waiterHasThePad = true;
+        notifyAll(); 
+
+        //espera que ele descreva o pedido
+        while(!orderDescribed)
         {
-            //acordar o waiter para sincronizar
-            notifyAll();
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-        //bar.setOrderDescribed(true);
+    }
+
+    public synchronized void describeTheOrder() 
+    {
+        System.out.println("order is described");
+        orderDescribed = true;
+        notifyAll();
     }
 
     public synchronized boolean hasEverybodyChosen() 
     {
         System.out.printf("pedidos dos estudantes = %d\n", numberOfStudentsRequests);
-        if (numberOfStudentsRequests == Constants.N)
-
-            return true; 
-        else
-            return false;
+        if (numberOfStudentsRequests == Constants.N) return true; else return false;
     }
 
     public synchronized void joinTheTalk() 
@@ -248,7 +265,7 @@ public class Table
         //estudante passa para o estado EJYML
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.EJYML);
-
+        System.out.printf("student %d has started eating\n", student.getStudentID());
         try {
             wait((long) (1 + 500 * Math.random ()));
         } catch (InterruptedException e) {
@@ -263,34 +280,35 @@ public class Table
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
+        System.out.printf("student %d has finished eating\n", student.getStudentID());
     }
 
     public synchronized boolean hasEverybodyFinished() 
     {
-        if(numberOfPortionsEaten == Constants.N) return true; else return false;
+        if(numberOfPortionsEaten == Constants.N) {
+            System.out.println("everybody has finished this course");
+            return true;
+        } else return false;
     }
 
     //função chamada pelo bar em signalTheWaiter
     public synchronized void allFinished() 
     {
-
         //student espera que waiter prepare a conta
         try {
             wait();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
     public synchronized void presentTheBill() 
     {
 
-        Waiter waiter =(Waiter)Thread.currentThread();
+        Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.RECPM);
         
-        //waiter bloqueia até honorTheBill
-
+        //waiter bloqueia até honourTheBill
         while(!studentHasPaid)
         {
             try {
@@ -323,9 +341,7 @@ public class Table
             Student student = ((Student) Thread.currentThread());
             student.setStudentState(StudentStates.GGHOM);
         }
-
         studentHasPaid=true;
-
     }
 
     public synchronized void goingHome(int studentID) 
@@ -346,8 +362,5 @@ public class Table
             }
         }
     }
-
-    
-
 }
 

@@ -1,6 +1,5 @@
 package entities;
 
-import javafx.scene.layout.BackgroundFill;
 import main.Constants;
 import sharedRegions.*;
 
