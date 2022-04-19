@@ -42,6 +42,8 @@ public class Kitchen
         if(chef.getChefState() != ChefStates.WAFOR) 
         {
             chef.setChefState(ChefStates.WAFOR);
+            int state = chef.getChefState();
+            repos.setChefState(state);
         }
         System.out.println("chef watches the news");
         while(!isNoteAvailable)
@@ -59,6 +61,8 @@ public class Kitchen
     {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PCODR);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
         System.out.println("waiter hands the note to chef");
         this.numberOfCoursesToDeliver = Constants.M;
         this.numberOfPortionsToDeliver = Constants.N;
@@ -83,6 +87,8 @@ public class Kitchen
     {
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DLVPT);
+        int state = chef.getChefState();
+        repos.setChefState(state);
         System.out.println("chef waits for waiter to collect portion");
         
         //chef espera pela entrega do waiter
@@ -101,6 +107,8 @@ public class Kitchen
         System.out.println("chef starts preparation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
+        int state = chef.getChefState();
+        repos.setChefState(state);
         numberOfCoursesToDeliver--;
         
         //Acorda waiter que está à espera em handTheNoteToChef
@@ -113,6 +121,8 @@ public class Kitchen
         System.out.println("chef proceeds to presentation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
+        int state = chef.getChefState();
+        repos.setChefState(state);
         numberOfPortionsToDeliver--;
     }
 
@@ -138,6 +148,8 @@ public class Kitchen
         System.out.println("chef have next portion ready");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
+        int state = chef.getChefState();
+        repos.setChefState(state);
         numberOfPortionsToDeliver--;
     }
 
@@ -146,6 +158,8 @@ public class Kitchen
         System.out.println("chef continues preparation");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
+        int state = chef.getChefState();
+        repos.setChefState(state);
         numberOfCoursesToDeliver--;
         numberOfPortionsToDeliver = Constants.N;
     }
@@ -155,5 +169,7 @@ public class Kitchen
         System.out.println("chef cleans up");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.CLSSV);
+        int state = chef.getChefState();
+        repos.setChefState(state);
     }
 }

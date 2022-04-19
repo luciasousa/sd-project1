@@ -12,6 +12,7 @@ public class Student extends Thread
     private int studentState;
     private final Table table;
     private final Bar bar;
+    private boolean bill=false;
 
 
     public Student(int studentID,int studentState, Table table, Bar bar)
@@ -69,8 +70,9 @@ public class Student extends Thread
             bar.signalTheWaiter();
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
+            bill=true;
         }
-        bar.exit();
+        if(bill) bar.exit();
     }
 
     /**

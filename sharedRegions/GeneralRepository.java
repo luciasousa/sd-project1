@@ -39,6 +39,7 @@ public class GeneralRepository {
     private int numberOfCourse;
     private int numberOfPortion;
     private int numberOfStudentsInRestaurant;
+    private int k = 0;
 
     public GeneralRepository(String logFileName){
         this.logFileName = logFileName;
@@ -48,7 +49,6 @@ public class GeneralRepository {
             studentState[i] = StudentStates.GGTRT;
         }
 
-        MemFIFO<Integer> studentsInTableQueue = null;
         try {
             studentsInTableQueue = new  MemFIFO(new Integer[Constants.N]);
         } catch (MemException e) {
@@ -76,6 +76,82 @@ public class GeneralRepository {
         }
         reportStatus ();
     }
+
+    public synchronized void updateStudentsInTableQueue(int studentID){
+        try {
+            studentsInTableQueue.write(studentID);
+        } catch (MemException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized void setChefState (int state)
+    {
+	  
+        switch(state) {
+            case 0: //WAFOR
+                break;
+            case 1: //PRPCS
+                numberOfCourse++;
+                break;
+            case 2: //DSHPT
+                break;
+            case 3: //DLVPT
+                if(numberOfPortion==Constants.N) numberOfPortion=0; else numberOfPortion++;
+                break;
+            case 4: //CLSSV
+                break;
+        }
+        chefState = state;
+        reportStatus ();
+   }
+
+    public synchronized void setWaiterState (int state)
+    {
+        switch(state) {
+            case 0: //APPST
+                break;
+            case 1: //PRSMN
+                break;
+            case 2: //TKODR
+                break;
+            case 3: //PCODR
+                break;
+            case 4: //WTFPT
+                break;
+            case 5: //PRCBL
+                break;
+            case 6: //RECPM
+                break;
+        }
+        waiterState = state;
+        reportStatus ();
+   }
+
+   public synchronized void setStudentState (int studenID,int state)
+    {
+	    switch(state) {
+            case 0: //GGTRT
+                break;
+            case 1: //TKSTT
+                updateStudentsInTableQueue(studenID);
+                break;
+            case 2: //SELCS
+                break;
+            case 3: //OGODR
+                break;
+            case 4: //CHTWC
+                break;
+            case 5: //EJYML
+                break;
+            case 6: //PYTBL
+                break;
+            case 7: //GGHOM
+                break;
+	    }
+        studentState[studenID] = state;
+        reportStatus ();
+   }
 
     private void reportStatus() {
         TextFile log = new TextFile ();                      // instantiation of a text file handler
@@ -139,21 +215,20 @@ public class GeneralRepository {
        
         lineStatus += " "+String.format("%7d", numberOfCourse)+"  "+String.format("%7d", numberOfPortion);
 
-        /*for(int i =0; i<Constants.N; i++){
-            try {
-                studentsInTableQueue.write(i);
-            } catch (MemException e) {
-                e.printStackTrace();
+        
+        try {
+            if(!studentsInTableQueue.empty){
+                int id = studentsInTableQueue.read();
+                for (int i = 0; i < k; i++){
+                    lineStatus += String.format("\t");
+                }
+                lineStatus += String.format("\t %5d ",id);
+                k++;
             }
+        } catch (MemException e) {
+            e.printStackTrace();
         }
-
-        for(int i =0; i<Constants.N; i++){
-            try {
-                lineStatus += " "+ String.format("%2d",studentsInTableQueue.read());
-            } catch (MemException e) {
-                e.printStackTrace();
-            }
-        }*/
+    
         log.writelnString (lineStatus);
         if (!log.close ()){ 
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");

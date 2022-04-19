@@ -59,6 +59,8 @@ public class Bar
         Waiter waiter = (Waiter) Thread.currentThread();
         if(waiter.getWaiterState() != WaiterStates.APPST) {
             waiter.setWaiterState(WaiterStates.APPST);
+            int state = waiter.getWaiterState();
+            repos.setWaiterState(state);
         }
         System.out.println("waiter looking");
 
@@ -124,6 +126,8 @@ public class Bar
         System.out.println("waiter is returning to bar");
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.APPST);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
     }
 
     public void callWaiter() 
@@ -175,6 +179,8 @@ public class Bar
         {
             Waiter waiter = (Waiter) Thread.currentThread();
             waiter.setWaiterState(WaiterStates.WTFPT);
+            int state = waiter.getWaiterState();
+            repos.setWaiterState(state);
         }
     }
 
@@ -205,6 +211,9 @@ public class Bar
     {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRCBL);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
+        System.out.println("waiter preparing the bill");
     }
 
     public int exit() 
@@ -226,6 +235,7 @@ public class Bar
             notifyAll();
         }
         table.goingHome(studentID);
+        
         //retorna a posição de chegada de cada estudante
         return numberOfStudentsInRestaurant;
     }
@@ -234,6 +244,7 @@ public class Bar
     public synchronized void sayGoodbye() 
     {
         numberOfStudentsInRestaurant -= 1;
+        System.out.println("saying goodbye");
         // transition occurs when the last student has left the restaurant
         while(numberOfStudentsInRestaurant != 0)
         {

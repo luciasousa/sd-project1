@@ -74,6 +74,9 @@ public class Table
     {
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.TKSTT);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
 
         while(!clientsSaluted[student.getStudentID()]) 
@@ -90,6 +93,8 @@ public class Table
     {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRSMN);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
         System.out.printf("waiter salute the client %d, state: %d\n", studentID, waiter.getWaiterState());
         
         //desbloqueia estudante preso em takeASeat
@@ -111,6 +116,8 @@ public class Table
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.SELCS);
         int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d read menu, state: %d\n", studentID, student.getStudentState());
         //desbloqueia waiter preso em saluteTheClient
         menuRead[studentID] = true;
@@ -123,6 +130,9 @@ public class Table
         //passa para o estado OGODR
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.OGODR);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d prepare the order, state: %d\n", student.getStudentID(), student.getStudentState());
 
         //esperar que seja acordado pelos outros estudantes
@@ -144,6 +154,9 @@ public class Table
         //todos os estudantes menos o primeiro transitam para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d inform companion, state: %d\n", student.getStudentID(), student.getStudentState());
         //desbloquear o 1º estudante
         wasInformed = true;
@@ -167,6 +180,9 @@ public class Table
         
         wasInformed = false;
         Student student = (Student) Thread.currentThread();
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d has been informed\n", student.getStudentID());
         //espera por ser desbloqueado pelo informCompanion
         while(!wasInformed)
@@ -198,6 +214,8 @@ public class Table
     { 
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.TKODR);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
         System.out.printf("waiter get the pad, state: %d\n", waiter.getWaiterState());
 
         //acorda o estudante
@@ -233,6 +251,9 @@ public class Table
         //primeiro estudante passa para o estado CHTWC
         Student student = (Student) Thread.currentThread();
         student.setStudentState(StudentStates.CHTWC);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.println("first student has joined the talk");
 
         while(!dishReady[student.getStudentID()])
@@ -265,6 +286,9 @@ public class Table
         //estudante passa para o estado EJYML
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.EJYML);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d has started eating\n", student.getStudentID());
         try {
             wait((long) (1 + 500 * Math.random ()));
@@ -280,6 +304,9 @@ public class Table
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
         System.out.printf("student %d has finished eating\n", student.getStudentID());
     }
 
@@ -308,7 +335,11 @@ public class Table
     {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.RECPM);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
+        System.out.println("presenting the bill");
         
+        notifyAll();
         //waiter bloqueia até honourTheBill
         while(!studentHasPaid)
         {
@@ -326,6 +357,9 @@ public class Table
         //ultimo estudante passa para o estado de PYTBL
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.PYTBL);
+        int studentID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(studentID, state);
     }
 
     public synchronized void honourTheBill() 
@@ -343,7 +377,12 @@ public class Table
         Student student = (Student)Thread.currentThread();
         //int studentID = student[studentsOrder[i]].getStudentID();
         student.setStudentState(StudentStates.GGHOM);
+        int stID = student.getStudentID();
+        int state = student.getStudentState();
+        repos.setStudentState(stID, state);
 
+        System.out.printf("student %d going home\n",studentID);
+        
         while(student.getStudentID() != studentID) 
         {
             try {

@@ -25,7 +25,7 @@ public class MemFIFO<R> extends MemObject<R>
    *   Signaling FIFO empty state.
    */
 
-   private boolean empty;
+   public boolean empty;
 
   /**
    *   FIFO instantiation.
