@@ -22,7 +22,7 @@ public class Table
     private int numberOfPortionsDelivered=0;
     //número de porções que já foram comidas
     private int numberOfPortionsEaten=0;
-    private boolean dishReady = false;
+    private boolean[] dishReady;
     //lista com pedidos dos estudantes
     //private Queue<Request> studentsRequestsQueue;
     private int numberOfStudentsRequests=1;
@@ -49,6 +49,7 @@ public class Table
     private int lastStudentToTakeASeat;
     private boolean[] clientsSaluted;
     private boolean orderDescribed;
+    private int id;
 
     public Table(GeneralRepository repos)
     {
@@ -65,6 +66,7 @@ public class Table
         this.repos = repos;
         clientsSaluted = new boolean[Constants.N];
         menuRead = new boolean[Constants.N];
+        dishReady = new boolean[Constants.N];
     }
 
     //função chamada pelo Bar
@@ -148,7 +150,7 @@ public class Table
         numberOfStudentsRequests += 1;
         notifyAll();
 
-        while(!dishReady) 
+        while(!dishReady[student.getStudentID()]) 
         {
             try {
                 wait();
@@ -231,7 +233,9 @@ public class Table
         //primeiro estudante passa para o estado CHTWC
         Student student = (Student) Thread.currentThread();
         student.setStudentState(StudentStates.CHTWC);
-        while(!dishReady)
+        System.out.println("first student has joined the talk");
+
+        while(!dishReady[student.getStudentID()])
         {
             try {
                 wait();
@@ -243,16 +247,12 @@ public class Table
 
     public synchronized void deliverPortion() 
     {
-        numberOfPortionsDelivered++;
-        dishReady = true;
-        
+        numberOfPortionsDelivered += 1;
+        System.out.printf("waiter is delivering the portion %d\n", numberOfPortionsDelivered);
+        dishReady[id] = true;
+        id += 1;
         //acorda um dos estudantes
-        notify();
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        notifyAll();
     }
 
     public boolean haveAllClientsBeenServed() 
@@ -276,7 +276,7 @@ public class Table
     public synchronized void endEating() 
     {
         //aumenta o número de porções comidas
-        numberOfPortionsEaten++;
+        numberOfPortionsEaten += 1;
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
@@ -285,16 +285,18 @@ public class Table
 
     public synchronized boolean hasEverybodyFinished() 
     {
-        if(numberOfPortionsEaten == Constants.N) {
-            System.out.println("everybody has finished this course");
+        if(numberOfPortionsEaten == Constants.N) 
+        {
+            numberOfPortionsEaten = 0;
             return true;
-        } else return false;
+        }  else return false;
     }
 
     //função chamada pelo bar em signalTheWaiter
     public synchronized void allFinished() 
     {
         //student espera que waiter prepare a conta
+        System.out.println("all students finished the course");
         try {
             wait();
         } catch (InterruptedException e) {
@@ -304,7 +306,6 @@ public class Table
 
     public synchronized void presentTheBill() 
     {
-
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.RECPM);
         
@@ -325,23 +326,13 @@ public class Table
         //ultimo estudante passa para o estado de PYTBL
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.PYTBL);
-        billPaid = true;
-
-        //student is waken up by the operation presentTheBill
-        notifyAll();
     }
 
     public synchronized void honourTheBill() 
     {
         //mantém no estado PYTBL até conta estar paga
         //se paga passa para estado GGHOM
-        isBillDelivered = true;
-        if(billPaid)
-        {
-            Student student = ((Student) Thread.currentThread());
-            student.setStudentState(StudentStates.GGHOM);
-        }
-        studentHasPaid=true;
+        studentHasPaid = true;
     }
 
     public synchronized void goingHome(int studentID) 

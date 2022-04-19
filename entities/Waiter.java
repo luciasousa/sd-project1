@@ -53,12 +53,9 @@ public class Waiter extends Thread
                     break;
                 
                 case 'p': //portion ready to be collected
-                    while(!table.haveAllClientsBeenServed()) 
-                    {
-                        bar.collectPortion();
-                        table.deliverPortion();
-                        bar.returnToBar();
-                    }
+                    bar.collectPortion();
+                    while(!table.haveAllClientsBeenServed()) table.deliverPortion();
+                    bar.returnToBar();
                     break;
 
                 case 'b': //bill presentation

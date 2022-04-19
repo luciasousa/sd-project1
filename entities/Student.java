@@ -46,7 +46,7 @@ public class Student extends Thread
         walkABit();
         int[] orderOfArrival = bar.enter();
         table.readMenu();
-        if (orderOfArrival[0]!=studentID) table.informCompanion();
+        if (orderOfArrival[0] != studentID) table.informCompanion();
         else
         {
             table.prepareTheOrder();
@@ -64,10 +64,9 @@ public class Student extends Thread
             while(table.hasEverybodyFinished());
         }
 
-        bar.signalTheWaiter();
-
-        if(orderOfArrival[Constants.N] == studentID) 
+        if(orderOfArrival[Constants.N-1] == studentID) 
         {
+            bar.signalTheWaiter();
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
         }

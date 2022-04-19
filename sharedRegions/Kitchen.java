@@ -57,15 +57,14 @@ public class Kitchen
     
     public synchronized void handTheNoteToChef() 
     {
-
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PCODR);
         System.out.println("waiter hands the note to chef");
         this.numberOfCoursesToDeliver = Constants.M;
         this.numberOfPortionsToDeliver = Constants.N;
-        isNoteAvailable = true;
-
+        
         //acorda chefe que está em watchTheNews
+        isNoteAvailable = true;
         notifyAll();
 
         //waiter espera pelo chef

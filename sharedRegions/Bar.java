@@ -24,20 +24,20 @@ public class Bar
     private MemFIFO<Integer> arrivalQueue;
 
     //número de estudantes no restaurante
-    private int numberOfStudentsInRestaurant = 0;
+    private int numberOfStudentsInRestaurant;
     private Table table;
     private Kitchen kitchen;
     private final GeneralRepository repos;
 
     private int studentsArrival[] = new int [Constants.N];
-    private boolean haveAllPortionsBeenDelivered = false;
-    private boolean firstStudent=false;
+    private int portionsCollected;
+    private boolean firstStudent;
 
     public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
         //initialize queue requests
         try {
-            pendingServiceRequests = new MemFIFO(new Request[Constants.N]);
+            pendingServiceRequests = new MemFIFO(new Request[Constants.N+1]);
         } catch (MemException e) {
             pendingServiceRequests = null;
             e.printStackTrace();
@@ -121,6 +121,7 @@ public class Bar
 
     public synchronized void returnToBar() 
     {
+        System.out.println("waiter is returning to bar");
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.APPST);
     }
@@ -150,8 +151,8 @@ public class Bar
     {
         synchronized(this) 
         {
-            //chef's ID is Number of students + 1
-            Request r = new Request(Constants.N + 1, 'p');
+            //chef's ID is equal to the number of students
+            Request r = new Request(Constants.N, 'p');
             numberOfPendingServiceRequests += 1;
             try {
                 pendingServiceRequests.write(r);
@@ -168,20 +169,12 @@ public class Bar
 
     public void collectPortion() 
     {
+        System.out.println("waiter is collecting portion");
         kitchen.prepareNextPortion();
         synchronized(this) 
         {
-            System.out.println("waiter is collecting portion");
             Waiter waiter = (Waiter) Thread.currentThread();
             waiter.setWaiterState(WaiterStates.WTFPT);
-            
-            while(!haveAllPortionsBeenDelivered) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -212,7 +205,6 @@ public class Bar
     {
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.PRCBL);
-
     }
 
     public int exit() 
@@ -239,10 +231,12 @@ public class Bar
     }
 
 
-    public synchronized void sayGoodbye() {
-        numberOfStudentsInRestaurant--;
+    public synchronized void sayGoodbye() 
+    {
+        numberOfStudentsInRestaurant -= 1;
         // transition occurs when the last student has left the restaurant
-        while(numberOfStudentsInRestaurant!=0){
+        while(numberOfStudentsInRestaurant != 0)
+        {
             try {
                 wait();
             } catch (InterruptedException e) {
