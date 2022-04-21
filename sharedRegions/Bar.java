@@ -174,7 +174,6 @@ public class Bar
     public void collectPortion() 
     {
         System.out.println("waiter is collecting portion");
-        kitchen.prepareNextPortion();
         synchronized(this)
         {
             Waiter waiter = (Waiter) Thread.currentThread();
@@ -182,6 +181,7 @@ public class Bar
             int state = waiter.getWaiterState();
             repos.setWaiterState(state);
         }
+        kitchen.portionHasBeenCollected();
     }
 
     //signal the waiter quando os estudantes acabaram de comer
@@ -204,7 +204,6 @@ public class Bar
             //acordar o waiter preso em lookAround
             notifyAll();
         }
-        //table.allFinished();
     }
 
     public synchronized void prepareTheBill() 

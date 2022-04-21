@@ -55,7 +55,8 @@ public class Waiter extends Thread
                 case 'p': //portion ready to be collected
                 //the waiter serves them in succession, only passing to the next course when signaled by the last
                 //student to finish eating that everybody is ready;
-                    if(!table.haveAllClientsBeenServed()){
+                    if(!table.haveAllClientsBeenServed())
+                    {
                         bar.collectPortion();
                         table.deliverPortion();
                         bar.returnToBar();

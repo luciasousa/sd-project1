@@ -22,13 +22,13 @@ public class Table
     //lista com o ID dos estudantes pela ordem de chegada à mesa
     //private Queue<Integer> studentsInTableQueue;
     //número de porções que já foram entregues
-    private int numberOfPortionsDelivered, numberOfCoursesDelivered=0;
+    private int numberOfPortionsDelivered, numberOfCoursesDelivered;
     //número de porções que já foram comidas
-    private int numberOfPortionsEaten=0;
+    private int numberOfPortionsEaten;
     private boolean[] dishReady;
     //lista com pedidos dos estudantes
     //private Queue<Request> studentsRequestsQueue;
-    private int numberOfStudentsRequests=1;
+    private int numberOfStudentsRequests = 1;
 
     //array de estudantes
     //private Student[] student;
@@ -59,6 +59,7 @@ public class Table
     private int numberStudentsWentHome = 0;
     private boolean billReady = false;
     private boolean readycourse=false;
+    private boolean hasEndedEating;
     
 
     public Table(GeneralRepository repos)
@@ -268,37 +269,41 @@ public class Table
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
         System.out.println("first student has joined the talk");
-        //!dishReady[student.getStudentID()] || 
         //só quando entrega um course é que começam a comer
         while(!courseReady[numberOfCoursesDelivered])
-        //while(!readycourse)
         {
+            System.out.println("LUCIA");
             try {
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        
     }
 
     public synchronized void deliverPortion() 
     {
-        
+        numberOfPortionsEaten = 0;
         numberOfPortionsDelivered += 1;
-        if(numberOfPortionsDelivered==Constants.N){
-            courseReady[numberOfCoursesDelivered]=true;
-            readycourse=true;
-        } 
-        
-        
         System.out.printf("waiter is delivering the portion %d\n", numberOfPortionsDelivered);
-        dishReady[id] = true;
-        id += 1;
-        //acorda estudantes quando course tiver na mesa
-       
-        //notifyAll();
-       
+        if(numberOfPortionsDelivered == Constants.N)
+        {
+            System.out.printf("course nº %d finished\n", numberOfCoursesDelivered);
+            courseReady[numberOfCoursesDelivered] = true;
+            notifyAll();
+            
+            while(!hasEndedEating)
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            hasEndedEating = false;
+            numberOfPortionsDelivered = 0;
+            if(numberOfCoursesDelivered < Constants.M - 1) numberOfCoursesDelivered += 1;
+        }
     }
 
     public boolean haveAllClientsBeenServed() 
@@ -308,14 +313,13 @@ public class Table
 
     public synchronized void startEating() 
     {
-        
         //estudante passa para o estado EJYML
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.EJYML);
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d has started eating, portion: %d, course: %d\n", student.getStudentID(), numberOfPortionsDelivered, numberOfCoursesDelivered);
+        System.out.printf("student %d has started eating, course: %d\n", student.getStudentID(), numberOfCoursesDelivered);
         try {
             wait((long) (1 + 500 * Math.random ()));
         } catch (InterruptedException e) {
@@ -327,11 +331,6 @@ public class Table
     {
         //aumenta o número de porções comidas
         numberOfPortionsEaten += 1;
-        if(numberOfPortionsEaten==Constants.N){
-            numberOfCoursesDelivered++;
-            courseReady[numberOfCoursesDelivered]=false;
-            readycourse=false;
-        }
         
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
@@ -346,17 +345,19 @@ public class Table
     {
         if(numberOfPortionsEaten == Constants.N) 
         {
-            numberOfPortionsEaten = 0;
-            return true;
-        }  else return false;
-    }
-
-    //função chamada pelo bar em signalTheWaiter
-    public synchronized void allFinished() 
-    {
-        //student espera que waiter prepare a conta
-        System.out.println("all students finished the course");
-        
+            hasEndedEating = true;
+            notifyAll();
+            courseReady[numberOfCoursesDelivered] = false;
+            while(!(courseReady[numberOfCoursesDelivered]))
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return true; 
+        } else return false;
     }
 
     public synchronized void presentTheBill() 

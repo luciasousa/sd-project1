@@ -22,8 +22,8 @@ public class Kitchen
 
     //flags
     private boolean isNoteAvailable = false;
-    private boolean isPortionDelivered = false;
     private boolean preparationStarted;
+    private boolean portionCollected;
 
     public Kitchen(GeneralRepository repos)
     {
@@ -92,7 +92,7 @@ public class Kitchen
         System.out.println("chef waits for waiter to collect portion");
         
         //chef espera pela entrega do waiter
-        while(!isPortionDelivered)
+        while(!portionCollected)
         {
             try {
                 wait();
@@ -100,16 +100,24 @@ public class Kitchen
                 e.printStackTrace();
             }
         }
+        portionCollected = false;
+    }
+
+    //função chamada pelo Bar em collectPortion
+    public synchronized void portionHasBeenCollected()
+    {
+        portionCollected = true;
+        notifyAll();
     }
 
     public synchronized void startPreparation() 
     {
-        System.out.printf("chef starts preparation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfCoursesToDeliver--;
+        System.out.printf("chef starts preparation\n");
         
         //Acorda waiter que está à espera em handTheNoteToChef
         preparationStarted = true;
@@ -118,12 +126,12 @@ public class Kitchen
 
     public synchronized void proceedToPresentation() 
     {
-        System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfPortionsToDeliver--;
+        System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     public synchronized boolean haveAllPortionsBeenDelivered() 
@@ -136,32 +144,25 @@ public class Kitchen
         if(numberOfCoursesToDeliver == 0) return true; else return false;
     }
 
-    //função chamada pelo Bar em collectPortion
-    public synchronized void prepareNextPortion() 
-    {
-        isPortionDelivered = true;
-        notifyAll();
-    }
-
     public synchronized void haveNextPortionReady() 
     {
-        System.out.printf("chef have next portion readycourse %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfPortionsToDeliver--;
+        System.out.printf("chef have next portion ready course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     public synchronized void continuePreparation() 
     {
-        System.out.printf("chef continues preparationcourse %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfCoursesToDeliver--;
         numberOfPortionsToDeliver = Constants.N;
+        System.out.printf("chef continues preparation course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     public synchronized void cleanUp() 

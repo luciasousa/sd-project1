@@ -62,12 +62,9 @@ public class Student extends Thread
 
         for(int i=0; i< Constants.M; i++)
         {
-            while(table.hasEverybodyFinished()){
-                table.startEating();
-                table.endEating();
-            }
-            
-            
+            table.startEating();
+            table.endEating();
+            while(!table.hasEverybodyFinished());
         }
         
         if(orderOfArrival[Constants.N-1] == studentID) 
@@ -77,11 +74,7 @@ public class Student extends Thread
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();
         }
-        
         bar.exit();
-        
-        
-        
     }
 
     /**
