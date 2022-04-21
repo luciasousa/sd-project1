@@ -32,6 +32,9 @@ public class Bar
     private int studentsArrival[] = new int [Constants.N];
     private int portionsCollected;
     private boolean firstStudent;
+    private boolean studentHasPaid;
+    private int numberStudentsWentHome;
+    private boolean[] clientsGoodbye;
 
     public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
@@ -52,6 +55,7 @@ public class Bar
         this.repos = repos;
         this.table = table;
         this.kitchen = kitchen;
+        clientsGoodbye = new boolean[Constants.N];
     }
 
     public synchronized Request lookAround() 
@@ -88,9 +92,6 @@ public class Bar
         int studentID;
         synchronized(this)
         {
-            //não podemos usar variável do numero de estudantes para operar sobre o primeiro
-            
-            //if(numberOfStudentsInRestaurant==0) firstStudent=true; else firstStudent=false;
             Student student = (Student) Thread.currentThread();
             studentID = student.getStudentID();
             System.out.printf("student %d enters\n", studentID);
@@ -215,7 +216,7 @@ public class Bar
         System.out.println("waiter preparing the bill");
     }
 
-    public int exit() 
+    public void exit() 
     {
         int studentID;
         synchronized(this)
@@ -232,28 +233,31 @@ public class Bar
             }
             //acorda waiter preso em lookAround
             notifyAll();
-        }
-        table.goingHome(studentID);
-        
-        //retorna a posição de chegada de cada estudante
-        return numberOfStudentsInRestaurant;
+            student.setStudentState(StudentStates.GGHOM);
+            numberStudentsWentHome++;
+            int stID = student.getStudentID();
+            int state = student.getStudentState();
+            repos.setStudentState(stID, state);
+
+            while(!clientsGoodbye[studentID])
+            {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.printf("student %d going home\n",studentID);
+        }        
     }
 
-
-    public synchronized void sayGoodbye(int studentID) 
+    public synchronized int sayGoodbye(int studentID) 
     {
-        numberOfStudentsInRestaurant -= 1;
-        System.out.println("saying goodbye");
-        System.out.printf("number of students still in restaurant: %d\n", numberOfStudentsInRestaurant);
-        // transition occurs when the last student has left the restaurant
-        while(numberOfStudentsInRestaurant != 0)
-        {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        System.out.printf("saying goodbye to student %d\n", studentID);
+        clientsGoodbye[studentID] = true;
+        notifyAll();
+        numberOfStudentsInRestaurant--;
+        return numberOfStudentsInRestaurant;
     }
 }
 

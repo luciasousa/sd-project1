@@ -70,9 +70,8 @@ public class Waiter extends Thread
                     break;
                     
                 case 'g': //say goodbye to students
-                //antes estava no bar
-                    bar.sayGoodbye(r.getRequestID());
-                    System.exit(0);
+                    int numberOfStudentsInRestaurant = bar.sayGoodbye(r.getRequestID());
+                    if(numberOfStudentsInRestaurant == 0) Thread.currentThread().stop();;
             }
         }
     }
