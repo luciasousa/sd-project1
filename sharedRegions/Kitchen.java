@@ -104,7 +104,7 @@ public class Kitchen
 
     public synchronized void startPreparation() 
     {
-        System.out.println("chef starts preparation");
+        System.out.printf("chef starts preparation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         int state = chef.getChefState();
@@ -118,7 +118,7 @@ public class Kitchen
 
     public synchronized void proceedToPresentation() 
     {
-        System.out.println("chef proceeds to presentation");
+        System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         int state = chef.getChefState();
@@ -145,7 +145,7 @@ public class Kitchen
 
     public synchronized void haveNextPortionReady() 
     {
-        System.out.println("chef have next portion ready");
+        System.out.printf("chef have next portion readycourse %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.DSHPT);
         int state = chef.getChefState();
@@ -155,7 +155,7 @@ public class Kitchen
 
     public synchronized void continuePreparation() 
     {
-        System.out.println("chef continues preparation");
+        System.out.printf("chef continues preparationcourse %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.PRPCS);
         int state = chef.getChefState();

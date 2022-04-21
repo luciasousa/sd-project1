@@ -53,9 +53,13 @@ public class Waiter extends Thread
                     break;
                 
                 case 'p': //portion ready to be collected
-                    bar.collectPortion();
-                    while(!table.haveAllClientsBeenServed()) table.deliverPortion();
-                    bar.returnToBar();
+                //the waiter serves them in succession, only passing to the next course when signaled by the last
+                //student to finish eating that everybody is ready;
+                    if(!table.haveAllClientsBeenServed()){
+                        bar.collectPortion();
+                        table.deliverPortion();
+                        bar.returnToBar();
+                    }
                     break;
 
                 case 'b': //bill presentation
@@ -65,7 +69,8 @@ public class Waiter extends Thread
                     break;
                     
                 case 'g': //say goodbye to students
-                    bar.sayGoodbye();
+                //antes estava no bar
+                    bar.sayGoodbye(r.getRequestID());
                     System.exit(0);
             }
         }

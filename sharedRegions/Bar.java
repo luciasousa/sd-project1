@@ -175,7 +175,7 @@ public class Bar
     {
         System.out.println("waiter is collecting portion");
         kitchen.prepareNextPortion();
-        synchronized(this) 
+        synchronized(this)
         {
             Waiter waiter = (Waiter) Thread.currentThread();
             waiter.setWaiterState(WaiterStates.WTFPT);
@@ -204,7 +204,7 @@ public class Bar
             //acordar o waiter preso em lookAround
             notifyAll();
         }
-        table.allFinished();
+        //table.allFinished();
     }
 
     public synchronized void prepareTheBill() 
@@ -241,10 +241,11 @@ public class Bar
     }
 
 
-    public synchronized void sayGoodbye() 
+    public synchronized void sayGoodbye(int studentID) 
     {
         numberOfStudentsInRestaurant -= 1;
         System.out.println("saying goodbye");
+        System.out.printf("number of students still in restaurant: %d\n", numberOfStudentsInRestaurant);
         // transition occurs when the last student has left the restaurant
         while(numberOfStudentsInRestaurant != 0)
         {

@@ -1,5 +1,8 @@
 package sharedRegions;
 import main.Constants;
+
+import java.util.Arrays;
+
 import commInfra.MemException;
 import commInfra.MemFIFO;
 import entities.*;
@@ -19,7 +22,7 @@ public class Table
     //lista com o ID dos estudantes pela ordem de chegada à mesa
     //private Queue<Integer> studentsInTableQueue;
     //número de porções que já foram entregues
-    private int numberOfPortionsDelivered=0;
+    private int numberOfPortionsDelivered, numberOfCoursesDelivered=0;
     //número de porções que já foram comidas
     private int numberOfPortionsEaten=0;
     private boolean[] dishReady;
@@ -48,8 +51,15 @@ public class Table
     private boolean studentHasPaid=false;
     private int lastStudentToTakeASeat;
     private boolean[] clientsSaluted;
+    private boolean[] clientsGoodbye;
     private boolean orderDescribed;
     private int id;
+    private boolean []courseReady;
+    private int lastStudentID = 0;
+    private int numberStudentsWentHome = 0;
+    private boolean billReady = false;
+    private boolean readycourse=false;
+    
 
     public Table(GeneralRepository repos)
     {
@@ -65,6 +75,8 @@ public class Table
         //studentsRequestsQueue = new LinkedList<>();
         this.repos = repos;
         clientsSaluted = new boolean[Constants.N];
+        clientsGoodbye = new boolean[Constants.N];
+        courseReady = new boolean[Constants.M];
         menuRead = new boolean[Constants.N];
         dishReady = new boolean[Constants.N];
     }
@@ -77,6 +89,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
+        lastStudentID = studentID;
         System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
 
         while(!clientsSaluted[student.getStudentID()]) 
@@ -163,7 +176,7 @@ public class Table
         numberOfStudentsRequests += 1;
         notifyAll();
 
-        while(!dishReady[student.getStudentID()]) 
+        while(!courseReady[numberOfCoursesDelivered]) 
         {
             try {
                 wait();
@@ -255,8 +268,10 @@ public class Table
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
         System.out.println("first student has joined the talk");
-
-        while(!dishReady[student.getStudentID()])
+        //!dishReady[student.getStudentID()] || 
+        //só quando entrega um course é que começam a comer
+        while(!courseReady[numberOfCoursesDelivered])
+        //while(!readycourse)
         {
             try {
                 wait();
@@ -264,16 +279,26 @@ public class Table
                 e.printStackTrace();
             }
         }
+        
     }
 
     public synchronized void deliverPortion() 
     {
+        
         numberOfPortionsDelivered += 1;
+        if(numberOfPortionsDelivered==Constants.N){
+            courseReady[numberOfCoursesDelivered]=true;
+            readycourse=true;
+        } 
+        
+        
         System.out.printf("waiter is delivering the portion %d\n", numberOfPortionsDelivered);
         dishReady[id] = true;
         id += 1;
-        //acorda um dos estudantes
-        notifyAll();
+        //acorda estudantes quando course tiver na mesa
+       
+        //notifyAll();
+       
     }
 
     public boolean haveAllClientsBeenServed() 
@@ -283,13 +308,14 @@ public class Table
 
     public synchronized void startEating() 
     {
+        
         //estudante passa para o estado EJYML
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.EJYML);
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d has started eating\n", student.getStudentID());
+        System.out.printf("student %d has started eating, portion: %d, course: %d\n", student.getStudentID(), numberOfPortionsDelivered, numberOfCoursesDelivered);
         try {
             wait((long) (1 + 500 * Math.random ()));
         } catch (InterruptedException e) {
@@ -301,6 +327,12 @@ public class Table
     {
         //aumenta o número de porções comidas
         numberOfPortionsEaten += 1;
+        if(numberOfPortionsEaten==Constants.N){
+            numberOfCoursesDelivered++;
+            courseReady[numberOfCoursesDelivered]=false;
+            readycourse=false;
+        }
+        
         //estudante passa para o estado CHTWC
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
@@ -324,11 +356,7 @@ public class Table
     {
         //student espera que waiter prepare a conta
         System.out.println("all students finished the course");
-        try {
-            wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        
     }
 
     public synchronized void presentTheBill() 
@@ -338,7 +366,8 @@ public class Table
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
         System.out.println("presenting the bill");
-        
+        billReady=true;
+        //desbloqueia ultimo estudante
         notifyAll();
         //waiter bloqueia até honourTheBill
         while(!studentHasPaid)
@@ -355,11 +384,20 @@ public class Table
     public synchronized void shouldHaveArrivedEarlier() 
     {
         //ultimo estudante passa para o estado de PYTBL
+        
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.PYTBL);
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
+        System.out.printf("student %d should have arrived earlier, pay the bill\n",studentID);
+        while(!billReady){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public synchronized void honourTheBill() 
@@ -367,8 +405,10 @@ public class Table
         //mantém no estado PYTBL até conta estar paga
         //se paga passa para estado GGHOM
         studentHasPaid = true;
+        notifyAll();
     }
 
+    
     public synchronized void goingHome(int studentID) 
     {
         //passam para o estado GGHOM
@@ -377,13 +417,16 @@ public class Table
         Student student = (Student)Thread.currentThread();
         //int studentID = student[studentsOrder[i]].getStudentID();
         student.setStudentState(StudentStates.GGHOM);
+        numberStudentsWentHome++;
         int stID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(stID, state);
 
         System.out.printf("student %d going home\n",studentID);
         
-        while(student.getStudentID() != studentID) 
+        notifyAll();
+        //while(!clientsGoodbye[studentID])
+        while(!studentHasPaid) 
         {
             try {
                 wait();
@@ -392,5 +435,31 @@ public class Table
             }
         }
     }
+
+   /* public synchronized void sayGoodbye(int studentID) 
+    {
+        Waiter waiter = (Waiter) Thread.currentThread();
+        waiter.setWaiterState(WaiterStates.APPST);
+        int state = waiter.getWaiterState();
+        repos.setWaiterState(state);
+
+        System.out.printf("saying goodbye to student %d \n", studentID);
+        clientsGoodbye[studentID] = true;
+        notifyAll();
+        
+        // transition occurs when the last student has left the restaurant
+        //waiter waits until last student left
+       // while(numberStudentsWentHome != Constants.N)
+        while(!Arrays.asList(clientsGoodbye).contains(false))
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        
+    }*/
+
 }
 
