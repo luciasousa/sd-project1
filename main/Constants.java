@@ -1,8 +1,16 @@
 package main;
 
+/**
+ *    Definition of the simulation parameters.
+ */
 public class Constants {
-    //number of students
+    /**
+     *   Number of Students
+     */
     public static final int N = 7;
-    //number of courses
+    
+    /**
+     *   Number of Courses
+     */
     public static final int M = 3;
 }
