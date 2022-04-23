@@ -9,14 +9,16 @@ import main.Constants;
 import genclass.GenericIO;
 import genclass.TextFile;
 
-/*
-General Repository.
-Responsible to keep the visible internal state of the problem.
-Prints in the logging file.
-Implemented as an implicit monitor.
-All public methods are executed in mutual exclusion.
-There are no internal synchronization points.
-*/
+/**
+ *
+ * General Repository
+ * Responsible to keep the visible internal state of the problem.
+ * Prints in the logging file.
+ * Implemented as an implicit monitor.
+ * All public methods are executed in mutual exclusion.
+ * There are no internal synchronization points.
+ * 
+ */
 
 public class GeneralRepository {
 
@@ -38,7 +40,6 @@ public class GeneralRepository {
     private MemFIFO<Integer> studentsInTableQueue;
     private int numberOfCourse;
     private int numberOfPortion;
-    private int numberOfStudentsInRestaurant;
     private int k = 0;
 
     public GeneralRepository(String logFileName){
@@ -54,7 +55,6 @@ public class GeneralRepository {
         } catch (MemException e) {
             e.printStackTrace();
         }
-        numberOfStudentsInRestaurant = 0;
         numberOfCourse=0;
         numberOfPortion=0;
 
@@ -65,16 +65,16 @@ public class GeneralRepository {
         TextFile log = new TextFile();
         if (!log.openForWriting (".", logFileName)){
             GenericIO.writelnString ("The operation of creating the file " + logFileName + " failed!");
-            System.exit (1);
+            System.exit(1);
         }
         log.writelnString ("The Restaurant - Description of the internal state");
         log.writelnString (" Chef   Waiter  Stu0  Stu1    Stu2   Stu3   Stu4   Stu5  Stu6    NCourse   NPortion                     Table       ");
         log.writelnString ("State   State  State  State  State  State  State  State  State                        Seat0 Seat1 Seat2 Seat3 Seat4 Seat5 Seat6");
-        if (!log.close ()){
+        if (!log.close()){
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }
-        reportStatus ();
+        reportStatus();
     }
 
     public synchronized void updateStudentsInTableQueue(int studentID){
@@ -103,7 +103,7 @@ public class GeneralRepository {
                 break;
         }
         chefState = state;
-        reportStatus ();
+        reportStatus();
    }
 
     public synchronized void setWaiterState (int state)
@@ -125,7 +125,7 @@ public class GeneralRepository {
                 break;
         }
         waiterState = state;
-        reportStatus ();
+        reportStatus();
    }
 
    public synchronized void setStudentState (int studenID,int state)
@@ -150,8 +150,20 @@ public class GeneralRepository {
                 break;
 	    }
         studentState[studenID] = state;
-        reportStatus ();
+        reportStatus();
    }
+
+    public synchronized void setNumberOfPortions(int nPortions)
+    {
+        numberOfPortion = nPortions;
+        reportStatus();
+    }
+
+    public synchronized void setNumberOfCourses(int nCourses)
+    {
+        numberOfCourse = nCourses;
+        reportStatus();
+    }
 
     private void reportStatus() {
         TextFile log = new TextFile ();                      // instantiation of a text file handler
@@ -215,7 +227,6 @@ public class GeneralRepository {
        
         lineStatus += " "+String.format("%7d", numberOfCourse)+"  "+String.format("%7d", numberOfPortion);
 
-        
         try {
             if(!studentsInTableQueue.empty){
                 int id = studentsInTableQueue.read();

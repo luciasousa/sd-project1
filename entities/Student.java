@@ -1,23 +1,16 @@
 package entities;
-
 import main.Constants;
 import sharedRegions.*;
 
 public class Student extends Thread 
 {
-    
-    //identify the student
-    //id + the state the student is in
     private int studentID;
     private int studentState;
     private final Table table;
     private final Bar bar;
-    private boolean bill=false;
-
 
     public Student(int studentID,int studentState, Table table, Bar bar)
     {
-        //initial state
         this.studentID = studentID;
         this.studentState = studentState;
         this.table = table;
@@ -66,6 +59,8 @@ public class Student extends Thread
             table.endEating();
             while(!table.hasEverybodyFinished());
         }
+
+        if(orderOfArrival[Constants.N-1] != studentID) table.waitForPayment();
         
         if(orderOfArrival[Constants.N-1] == studentID) 
         {
@@ -78,11 +73,10 @@ public class Student extends Thread
     }
 
     /**
-   *  Living normal life.
-   *
-   *  Internal operation.
-   */
-
+     *  Living normal life.
+     *
+     *  Internal operation.
+     */
     private void walkABit() {
         //estudantes vão chegando ao restaurante aleatoriamente
         //estudantes estão no primeiro estado bloqueados

@@ -4,10 +4,6 @@ import sharedRegions.*;
 
 public class Waiter extends Thread 
 {
-
-    //identify the waiter
-    //the state the waiter is in
-
     private int waiterState;
     private Bar bar;
     private Kitchen kitchen;
@@ -15,7 +11,6 @@ public class Waiter extends Thread
 
     public Waiter(int waiterState, Bar bar, Kitchen kitchen, Table table)
     {
-        //initial state
         this.waiterState = waiterState;
         this.bar = bar;
         this.kitchen = kitchen;
@@ -53,8 +48,6 @@ public class Waiter extends Thread
                     break;
                 
                 case 'p': //portion ready to be collected
-                //the waiter serves them in succession, only passing to the next course when signaled by the last
-                //student to finish eating that everybody is ready;
                     if(!table.haveAllClientsBeenServed())
                     {
                         bar.collectPortion();
@@ -71,7 +64,7 @@ public class Waiter extends Thread
                     
                 case 'g': //say goodbye to students
                     int numberOfStudentsInRestaurant = bar.sayGoodbye(r.getRequestID());
-                    if(numberOfStudentsInRestaurant == 0) Thread.currentThread().stop();;
+                    if(numberOfStudentsInRestaurant == 0) return;
             }
         }
     }

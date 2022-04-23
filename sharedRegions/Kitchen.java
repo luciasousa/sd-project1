@@ -1,5 +1,4 @@
 package sharedRegions;
-
 import entities.*;
 import main.Constants;
 
@@ -19,8 +18,6 @@ public class Kitchen
     private int numberOfPortionsToDeliver;
     private final GeneralRepository repos;
     private boolean firstCourse;
-
-    //flags
     private boolean isNoteAvailable = false;
     private boolean preparationStarted;
     private boolean portionCollected;
@@ -31,14 +28,34 @@ public class Kitchen
         this.repos = repos;
     }
 
+    /**
+     *    Operation set first course
+     *
+     *    Called by the chef to set first course
+     *    @param b boolean value setting the first course
+     *    
+     */
     public void setFirstCourse(boolean b) { firstCourse = b; }
 
+    /**
+     *    Operation get first course
+     *
+     *    Called by the chef to get first course
+     *    @return boolean value for the first course
+     *    
+     */
     public boolean getFirstCourse() { return firstCourse; }
 
+    /**
+     *    Operation watch the news
+     *
+     *    Called by the chef to watch the news
+     *    waits until note is available
+     *    
+     */
     public synchronized void watchTheNews() 
     {
         Chef chef = (Chef) Thread.currentThread();
-
         if(chef.getChefState() != ChefStates.WAFOR) 
         {
             chef.setChefState(ChefStates.WAFOR);
@@ -57,6 +74,14 @@ public class Kitchen
         System.out.println("chef has note");
     }
     
+    /**
+     *    Operation hand note to the chef
+     *
+     *    Called by the waiter to hand note to the chef
+     *    signals chef that note is available
+     *    waiter waits until chef starts preparation
+     *    
+     */
     public synchronized void handTheNoteToChef() 
     {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -66,12 +91,8 @@ public class Kitchen
         System.out.println("waiter hands the note to chef");
         this.numberOfCoursesToDeliver = Constants.M;
         this.numberOfPortionsToDeliver = Constants.N;
-        
-        //acorda chefe que está em watchTheNews
         isNoteAvailable = true;
         notifyAll();
-
-        //waiter espera pelo chef
         while(!preparationStarted)
         {
             try {
@@ -82,7 +103,12 @@ public class Kitchen
         }
     }
 
-    //função chamada pelo Bar em alertTheWaiter
+    /**
+     *    Operation chef wait for collection
+     *
+     *    Called by the waiter for chef to wait for collection of the portion
+     *    
+     */
     public synchronized void chefWaitForCollection() 
     {
         Chef chef = (Chef) Thread.currentThread();
@@ -90,8 +116,6 @@ public class Kitchen
         int state = chef.getChefState();
         repos.setChefState(state);
         System.out.println("chef waits for waiter to collect portion");
-        
-        //chef espera pela entrega do waiter
         while(!portionCollected)
         {
             try {
@@ -103,13 +127,26 @@ public class Kitchen
         portionCollected = false;
     }
 
-    //função chamada pelo Bar em collectPortion
+    /**
+     *    Operation portion has been collected
+     *
+     *    Called by the waiter to inform that portion was collected
+     *    signals chef that portion was collected
+     *    
+     */
     public synchronized void portionHasBeenCollected()
     {
         portionCollected = true;
         notifyAll();
     }
 
+    /**
+     *    Operation start preparation
+     *
+     *    Called by the chef to start preparation
+     *    signals waiter that preperation was started
+     *    
+     */    
     public synchronized void startPreparation() 
     {
         Chef chef = (Chef) Thread.currentThread();
@@ -118,12 +155,16 @@ public class Kitchen
         repos.setChefState(state);
         numberOfCoursesToDeliver--;
         System.out.printf("chef starts preparation\n");
-        
-        //Acorda waiter que está à espera em handTheNoteToChef
         preparationStarted = true;
         notifyAll();
     }
 
+    /**
+     *    Operation proceedToPresentation
+     *
+     *    Called by the chef to proceed to presentation
+     *    
+     */
     public synchronized void proceedToPresentation() 
     {
         Chef chef = (Chef) Thread.currentThread();
@@ -134,16 +175,34 @@ public class Kitchen
         System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
+    /**
+     *    Operation have all portions been delivered
+     *
+     *    Called by the chef to check if all portions were delivered
+     *    
+     */
     public synchronized boolean haveAllPortionsBeenDelivered() 
     {
         if(numberOfPortionsToDeliver == 0) return true; else return false;
     }
 
+    /**
+     *    Operation has the order been completed
+     *
+     *    Called by the chef to check if the order was completed
+     *    
+     */
     public synchronized boolean hasTheOrderBeenCompleted() 
     {
         if(numberOfCoursesToDeliver == 0) return true; else return false;
     }
 
+    /**
+     *    Operation have next portion ready
+     *
+     *    Called by the chef to have next portion ready
+     *    
+     */
     public synchronized void haveNextPortionReady() 
     {
         Chef chef = (Chef) Thread.currentThread();
@@ -154,6 +213,12 @@ public class Kitchen
         System.out.printf("chef have next portion ready course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
+    /**
+     *    Operation continue preparation
+     *
+     *    Called by the chef to continue preparation
+     *    
+     */
     public synchronized void continuePreparation() 
     {
         Chef chef = (Chef) Thread.currentThread();
@@ -165,6 +230,12 @@ public class Kitchen
         System.out.printf("chef continues preparation course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
+    /**
+     *    Operation clean up
+     *
+     *    Called by the chef to clean up
+     *    
+     */
     public synchronized void cleanUp() 
     {
         System.out.println("chef cleans up");

@@ -4,17 +4,12 @@ import sharedRegions.*;
 
 public class Chef extends Thread 
 {
-    
-    //identify the chef
-    //the state the chef is in
-
     private int chefState;
     private Kitchen kitchen;
     private Bar bar;
 
     public Chef(int chefState, Kitchen kitchen, Bar bar)
     {
-        //initial state
         this.chefState = chefState;
         this.kitchen = kitchen;
         this.bar = bar;

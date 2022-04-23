@@ -17,35 +17,24 @@ import entities.*;
 
 public class Bar 
 {
-    //número de serviços pendentes
-    private int numberOfPendingServiceRequests=0;
-    //fila com os serviços pendentes
+    private int numberOfPendingServiceRequests = 0;
     private MemFIFO<Request> pendingServiceRequests;
     private MemFIFO<Integer> arrivalQueue;
-
-    //número de estudantes no restaurante
     private int numberOfStudentsInRestaurant;
     private Table table;
     private Kitchen kitchen;
     private final GeneralRepository repos;
-
-    private int studentsArrival[] = new int [Constants.N];
-    private int portionsCollected;
-    private boolean firstStudent;
-    private boolean studentHasPaid;
-    private int numberStudentsWentHome;
+    private int[] studentsArrival;
     private boolean[] clientsGoodbye;
 
     public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
-        //initialize queue requests
         try {
             pendingServiceRequests = new MemFIFO(new Request[Constants.N+1]);
         } catch (MemException e) {
             pendingServiceRequests = null;
             e.printStackTrace();
         }
-        //initialize other variables
         try {
             arrivalQueue = new MemFIFO(new Integer[Constants.N]);
         } catch (MemException e) {
@@ -55,9 +44,18 @@ public class Bar
         this.repos = repos;
         this.table = table;
         this.kitchen = kitchen;
+        studentsArrival = new int [Constants.N];
         clientsGoodbye = new boolean[Constants.N];
     }
 
+    /**
+     *    Operation look around
+     *
+     *    Called by the waiter to look around
+     *    waits until has requests
+     *    @return the request read from the queue
+     * 
+     */
     public synchronized Request lookAround() 
     {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -67,7 +65,6 @@ public class Bar
             repos.setWaiterState(state);
         }
         System.out.println("waiter looking");
-
         while(numberOfPendingServiceRequests == 0) {
             try {
                 wait();
@@ -87,6 +84,16 @@ public class Bar
         return request;
     }
 
+    /**
+     *    Operation enter
+     *
+     *    Called by the student to enter in the restaurant
+     *    puts a request for the waiter 
+     *    signals waiter 
+     *    while students are waiting to take a seat at the table
+     *    @return array of the students IDs in order of arrival
+     * 
+     */
     public int[] enter() 
     {
         int studentID;
@@ -95,7 +102,6 @@ public class Bar
             Student student = (Student) Thread.currentThread();
             studentID = student.getStudentID();
             System.out.printf("student %d enters\n", studentID);
-            //add student in order to the queue
             try {
                 arrivalQueue.write(studentID);
             } catch (MemException e1) {
@@ -110,18 +116,18 @@ public class Bar
             } catch (MemException e) {
                 e.printStackTrace();
             }
-            //acorda waiter preso em lookAround
             notifyAll();
         }
         table.takeASeat();
-        //retorna a posição de chegada de cada estudante
         return studentsArrival;
     }
 
-    public synchronized MemFIFO<Integer> getArrivalQueue(){
-        return arrivalQueue;
-    }
-
+    /**
+     *    Operation return to bar
+     *
+     *    Called by the waiter to return to the bar
+     * 
+     */
     public synchronized void returnToBar() 
     {
         System.out.println("waiter is returning to bar");
@@ -131,9 +137,17 @@ public class Bar
         repos.setWaiterState(state);
     }
 
+    /**
+     *    Operation call waiter
+     *
+     *    Called by the student to describe the order
+     *    puts a request for the waiter
+     *    signals waiter waiting in lookaround
+     *    while students are waiting in the table for waiter to get the pad
+     * 
+     */
     public void callWaiter() 
     {
-        //estudante adiciona pedido à requests queue e acorda o waiter
         System.out.println("waiter was called");
         synchronized(this) 
         {
@@ -146,12 +160,20 @@ public class Bar
             } catch (MemException e) {
                 e.printStackTrace();
             }
-            //acordar o waiter preso em lookAround
             notifyAll();
         }
         table.waitForPad();
     }
 
+    /**
+     *    Operation alert the waiter
+     *
+     *    Called by the chef for waiter collect the portions
+     *    puts a request for the waiter
+     *    signals waiter waiting in lookaround
+     *    while chef is waiting in the kitchen for the collection
+     * 
+     */
     public void alertTheWaiter() 
     {
         synchronized(this) 
@@ -164,14 +186,19 @@ public class Bar
             } catch (MemException e) {
                 e.printStackTrace();
             }
-            
-            //wake up the waiter stuck in lookAround 
             notifyAll();
             System.out.println("chef alerts the waiter");
         }
         kitchen.chefWaitForCollection();
     }
 
+    /**
+     *    Operation collect portion
+     *
+     *    Called by the waiter to collect portion
+     *    and informing chef in the kitchen that portion was collected
+     * 
+     */
     public void collectPortion() 
     {
         System.out.println("waiter is collecting portion");
@@ -185,10 +212,16 @@ public class Bar
         kitchen.portionHasBeenCollected();
     }
 
-    //signal the waiter quando os estudantes acabaram de comer
+    /**
+     *    Operation signal the waiter
+     *
+     *    Called by the last student to signal the waiter after everybody eaten and is time to pay
+     *    puts a request for the waiter
+     *    signals waiter waiting in lookaround
+     *    
+     */
     public void signalTheWaiter() 
     {
-        //estudante adiciona pedido à requests queue e acorda o waiter
         synchronized(this) 
         {
             System.out.println("waiter has been signaled");
@@ -202,11 +235,16 @@ public class Bar
             } catch (MemException e) {
                 e.printStackTrace();
             }
-            //acordar o waiter preso em lookAround
             notifyAll();
         }
     }
 
+    /**
+     *    Operation prepare the bill
+     *
+     *    Called by the waiter to prepare the bill
+     * 
+     */
     public synchronized void prepareTheBill() 
     {
         Waiter waiter = (Waiter) Thread.currentThread();
@@ -216,6 +254,15 @@ public class Bar
         System.out.println("waiter preparing the bill");
     }
 
+    /**
+     *    Operation exit
+     *
+     *    Called by the student to exit the restaurant
+     *    puts a request for the waiter
+     *    signals waiter waiting in lookaround
+     *    waits for waiter to say goodbye 
+     * 
+     */
     public void exit() 
     {
         int studentID;
@@ -231,14 +278,11 @@ public class Bar
             } catch (MemException e) {
                 e.printStackTrace();
             }
-            //acorda waiter preso em lookAround
             notifyAll();
             student.setStudentState(StudentStates.GGHOM);
-            numberStudentsWentHome++;
             int stID = student.getStudentID();
             int state = student.getStudentState();
             repos.setStudentState(stID, state);
-
             while(!clientsGoodbye[studentID])
             {
                 try {
@@ -251,6 +295,13 @@ public class Bar
         }        
     }
 
+    /**
+     *    Operation say goodbye
+     *
+     *    Called by the waiter to say goodbye to the student
+     *    signals student that waiter said goodbye
+     *    
+     */
     public synchronized int sayGoodbye(int studentID) 
     {
         System.out.printf("saying goodbye to student %d\n", studentID);
