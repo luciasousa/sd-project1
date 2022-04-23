@@ -43,11 +43,6 @@ public class GeneralRepository {
     private int[] studentState = new int[Constants.N];
 
     /**
-     *  FIFO with students at the table.
-     */
-    private MemFIFO<Integer> studentsInTableQueue;
-
-    /**
      *  Counter with the number of course.
      */
     private int numberOfCourse;
@@ -55,9 +50,15 @@ public class GeneralRepository {
     /**
      *  Counter with the number of portion.
      */
-    private int numberOfPortion;
+    private int numberOfPortion;    
 
-    private int k = 0;
+    /**
+     *  Array with the order that students sat down
+     */
+    private int[] seatOrder;
+
+    private int seatNumber = 0;
+
 
     /**
      *   Instantiation of a general repository object.
@@ -74,13 +75,9 @@ public class GeneralRepository {
             studentState[i] = StudentStates.GGTRT;
         }
 
-        try {
-            studentsInTableQueue = new  MemFIFO(new Integer[Constants.N]);
-        } catch (MemException e) {
-            e.printStackTrace();
-        }
         numberOfCourse = 0;
         numberOfPortion = 0;
+        seatOrder = new int[Constants.N];
 
         reportInitialStatus();
     }
@@ -99,8 +96,8 @@ public class GeneralRepository {
             System.exit(1);
         }
         log.writelnString ("\t\t\t\t\t\t\t\t\t\t\t\tThe Restaurant - Description of the internal state\n");
-        log.writelnString (" Chef   Waiter  Stu0  Stu1    Stu2   Stu3   Stu4   Stu5  Stu6    NCourse   NPortion                     Table       ");
-        log.writelnString ("State   State  State  State  State  State  State  State  State                        Seat0 Seat1 Seat2 Seat3 Seat4 Seat5 Seat6");
+        log.writelnString (" Chef   Waiter  Stu0  Stu1    Stu2   Stu3   Stu4   Stu5  Stu6    NCourse   NPortion                         Table       ");
+        log.writelnString ("State   State  State  State  State  State  State  State  State                        Seat0\t Seat1\tSeat2\tSeat3\tSeat4\tSeat5\tSeat6");
         if (!log.close())
         {
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
@@ -110,42 +107,12 @@ public class GeneralRepository {
     }
 
     /**
-    *   Update FIFO updateStudentsInTableQueue
-    *
-    *     @param studentID integer
-    */
-    public synchronized void updateStudentsInTableQueue(int studentID)
-    {
-        try {
-            studentsInTableQueue.write(studentID);
-        } catch (MemException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
     *   Set chef state.
     *
     *     @param state chef state
     */
     public synchronized void setChefState (int state)
     {
-	  
-        switch(state) 
-        {
-            case 0: //WAFOR
-                break;
-            case 1: //PRPCS
-                numberOfCourse += 1;
-                numberOfPortion = 0;
-                break;
-            case 2: //DSHPT
-                break;
-            case 3: //DLVPT
-                break;
-            case 4: //CLSSV
-                break;
-        }
         chefState = state;
         reportStatus();
    }
@@ -168,29 +135,9 @@ public class GeneralRepository {
     */
    public synchronized void setStudentState (int studentID, int state)
     {
-	    switch(state) 
-        {
-            case 0: //GGTRT
-                break;
-            case 1: //TKSTT
-                updateStudentsInTableQueue(studentID);
-                break;
-            case 2: //SELCS
-                break;
-            case 3: //OGODR
-                break;
-            case 4: //CHTWC
-                break;
-            case 5: //EJYML
-                break;
-            case 6: //PYTBL
-                break;
-            case 7: //GGHOM
-                break;
-	    }
         studentState[studentID] = state;
         reportStatus();
-   }
+    }
 
    /**
     *   Update Counter numberOfPortion
@@ -215,6 +162,32 @@ public class GeneralRepository {
     }
 
     /**
+    *   Update Counter numberOfPortions and numberOfCourses
+    *
+    *     @param nPortions integer
+    *     @param nCourses integer
+    */
+
+    public synchronized void setNumberOfPortionsAndCourses(int nPortions, int nCourses)
+    {
+        numberOfPortion = nPortions;
+        numberOfCourse = nCourses;
+        reportStatus();
+    }
+
+    /**
+    *   Update Array seatOrder
+    *
+    *     @param id integer
+    */
+
+    public synchronized void setSeatOrder(int id)
+    {
+        seatOrder[seatNumber] = id;
+        seatNumber += 1;
+    }   
+
+    /**
      *  Write a state line at the end of the logging file.
      *
      *  The current state of entities is organized in a line to be printed.
@@ -225,6 +198,7 @@ public class GeneralRepository {
         TextFile log = new TextFile ();                      // instantiation of a text file handler
 
         String lineStatus = "";                              // state line to be printed
+        String seats = "";
 
         if (!log.openForAppending (".", logFileName))
         { 
@@ -287,21 +261,11 @@ public class GeneralRepository {
        
         lineStatus += " "+String.format("%7d", numberOfCourse)+"  "+String.format("%7d", numberOfPortion);
 
-        try {
-            if(!studentsInTableQueue.empty)
-            {
-                int id = studentsInTableQueue.read();
-                for (int i = 0; i < k; i++)
-                {
-                    lineStatus += String.format("\t");
-                }
-                lineStatus += String.format("\t %5d ",id);
-                k++;
-            }
-        } catch (MemException e) {
-            e.printStackTrace();
+        for(int i = 0; i < seatNumber; i++)
+        {
+            seats += String.format("\t%4d ", seatOrder[i]);
         }
-    
+        lineStatus += seats;
         log.writelnString (lineStatus);
         if (!log.close ())
         { 
@@ -331,12 +295,11 @@ public class GeneralRepository {
         "NCourse - number of the course: 0 upto M\n" +
         "NPortion - number of the portion of a course: 0 upto N\n" +
         "Table Seat# - id of the student sat at that chair\n");
-        
+
         if (!log.close ())
         { 
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }
-        
     }
 }

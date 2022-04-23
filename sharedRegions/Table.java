@@ -114,6 +114,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
+        repos.setSeatOrder(studentID);
         //System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
 
         while(!clientsSaluted[student.getStudentID()]) 
@@ -379,8 +380,8 @@ public class Table
             
             numberOfPortionsDelivered = 0;
             if(numberOfCoursesDelivered < Constants.M - 1) numberOfCoursesDelivered += 1;
-            //repos.setNumberOfCourses(numberOfCoursesDelivered);
-            if(!coursesCompleted) repos.setNumberOfPortions(numberOfPortionsDelivered);
+            repos.setNumberOfPortionsAndCourses(numberOfPortionsDelivered, numberOfCoursesDelivered);
+            if(coursesCompleted) repos.setNumberOfCourses(numberOfCoursesDelivered + 1);
         }
     }
 
