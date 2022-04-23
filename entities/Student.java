@@ -43,7 +43,7 @@ public class Student extends Thread
         this.studentID = studentID;
         this.studentState = studentState;
         this.table = table;
-        this.bar=bar;
+        this.bar = bar;
     }
 
     /**
@@ -95,14 +95,12 @@ public class Student extends Thread
         walkABit();
         int[] orderOfArrival = bar.enter();
         table.readMenu();
-        if (orderOfArrival[0] != studentID){
-            table.informCompanion();
-        } 
+        if (orderOfArrival[0] != studentID) table.informCompanion();
         else
         {
             table.prepareTheOrder();
             while(!table.hasEverybodyChosen()) table.addUpOnesChoice();
-            System.out.println("student is going to call the waiter");
+            //System.out.println("student is going to call the waiter");
             bar.callWaiter();
             table.describeTheOrder();
             table.joinTheTalk();
@@ -119,7 +117,7 @@ public class Student extends Thread
         
         if(orderOfArrival[Constants.N-1] == studentID) 
         {
-            System.out.println("last student is paying the bill");
+            //System.out.println("last student is paying the bill");
             bar.signalTheWaiter();
             table.shouldHaveArrivedEarlier();
             table.honourTheBill();

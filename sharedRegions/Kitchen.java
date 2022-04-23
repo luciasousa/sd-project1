@@ -94,7 +94,7 @@ public class Kitchen
             int state = chef.getChefState();
             repos.setChefState(state);
         }
-        System.out.println("chef watches the news");
+        //System.out.println("chef watches the news");
         while(!isNoteAvailable)
         {
             try{
@@ -103,7 +103,7 @@ public class Kitchen
                 e.printStackTrace();
             }
         }
-        System.out.println("chef has note");
+        //System.out.println("chef has note");
     }
     
     /**
@@ -120,7 +120,7 @@ public class Kitchen
         waiter.setWaiterState(WaiterStates.PCODR);
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
-        System.out.println("waiter hands the note to chef");
+        //System.out.println("waiter hands the note to chef");
         this.numberOfCoursesToDeliver = Constants.M;
         this.numberOfPortionsToDeliver = Constants.N;
         isNoteAvailable = true;
@@ -147,7 +147,7 @@ public class Kitchen
         chef.setChefState(ChefStates.DLVPT);
         int state = chef.getChefState();
         repos.setChefState(state);
-        System.out.println("chef waits for waiter to collect portion");
+        //System.out.println("chef waits for waiter to collect portion");
         while(!portionCollected)
         {
             try {
@@ -186,7 +186,7 @@ public class Kitchen
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfCoursesToDeliver--;
-        System.out.printf("chef starts preparation\n");
+        //System.out.printf("chef starts preparation\n");
         preparationStarted = true;
         notifyAll();
     }
@@ -204,7 +204,7 @@ public class Kitchen
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfPortionsToDeliver--;
-        System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
+        //System.out.printf("chef proceeds to presentation, course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     /**
@@ -244,7 +244,7 @@ public class Kitchen
         int state = chef.getChefState();
         repos.setChefState(state);
         numberOfPortionsToDeliver--;
-        System.out.printf("chef have next portion ready course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
+        //System.out.printf("chef have next portion ready course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     /**
@@ -261,7 +261,7 @@ public class Kitchen
         repos.setChefState(state);
         numberOfCoursesToDeliver--;
         numberOfPortionsToDeliver = Constants.N;
-        System.out.printf("chef continues preparation course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
+        //System.out.printf("chef continues preparation course %d, portion %d\n",numberOfCoursesToDeliver,numberOfPortionsToDeliver);
     }
 
     /**
@@ -272,7 +272,7 @@ public class Kitchen
      */
     public synchronized void cleanUp() 
     {
-        System.out.println("chef cleans up");
+        //System.out.println("chef cleans up");
         Chef chef = (Chef) Thread.currentThread();
         chef.setChefState(ChefStates.CLSSV);
         int state = chef.getChefState();

@@ -1,5 +1,4 @@
 package sharedRegions;
-import libraries.*;
 import main.Constants;
 import commInfra.*;
 import entities.*;
@@ -107,12 +106,12 @@ public class Bar
             int state = waiter.getWaiterState();
             repos.setWaiterState(state);
         }
-        System.out.println("waiter looking");
+        //System.out.println("waiter looking");
         while(numberOfPendingServiceRequests == 0) {
             try {
                 wait();
             } catch (Exception e) {
-                System.out.println("Thread interrupted");
+                //System.out.println("Thread interrupted");
             }
         }
         Request request = null;
@@ -121,8 +120,8 @@ public class Bar
         } catch (MemException e) {
             e.printStackTrace();
         }
-        System.out.print(request.getRequestID());
-        System.out.println(" - " + request.getRequestType());
+        //System.out.print(request.getRequestID());
+        //System.out.println(" - " + request.getRequestType());
         numberOfPendingServiceRequests--;
         return request;
     }
@@ -144,7 +143,7 @@ public class Bar
         {
             Student student = (Student) Thread.currentThread();
             studentID = student.getStudentID();
-            System.out.printf("student %d enters\n", studentID);
+            //System.out.printf("student %d enters\n", studentID);
             try {
                 arrivalQueue.write(studentID);
             } catch (MemException e1) {
@@ -173,7 +172,7 @@ public class Bar
      */
     public synchronized void returnToBar() 
     {
-        System.out.println("waiter is returning to bar");
+        //System.out.println("waiter is returning to bar");
         Waiter waiter = (Waiter) Thread.currentThread();
         waiter.setWaiterState(WaiterStates.APPST);
         int state = waiter.getWaiterState();
@@ -191,7 +190,7 @@ public class Bar
      */
     public void callWaiter() 
     {
-        System.out.println("waiter was called");
+        //System.out.println("waiter was called");
         synchronized(this) 
         {
             Student student = (Student)Thread.currentThread();
@@ -230,7 +229,7 @@ public class Bar
                 e.printStackTrace();
             }
             notifyAll();
-            System.out.println("chef alerts the waiter");
+            //System.out.println("chef alerts the waiter");
         }
         kitchen.chefWaitForCollection();
     }
@@ -244,7 +243,7 @@ public class Bar
      */
     public void collectPortion() 
     {
-        System.out.println("waiter is collecting portion");
+        //System.out.println("waiter is collecting portion");
         synchronized(this)
         {
             Waiter waiter = (Waiter) Thread.currentThread();
@@ -267,7 +266,7 @@ public class Bar
     {
         synchronized(this) 
         {
-            System.out.println("waiter has been signaled");
+            //System.out.println("waiter has been signaled");
             Student student = (Student)Thread.currentThread();
             int studentID = student.getStudentID();
             //bill presentation
@@ -294,7 +293,7 @@ public class Bar
         waiter.setWaiterState(WaiterStates.PRCBL);
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
-        System.out.println("waiter preparing the bill");
+        //System.out.println("waiter preparing the bill");
     }
 
     /**
@@ -334,7 +333,7 @@ public class Bar
                     e.printStackTrace();
                 }
             }
-            System.out.printf("student %d going home\n",studentID);
+            //System.out.printf("student %d going home\n",studentID);
         }        
     }
 
@@ -350,7 +349,7 @@ public class Bar
      */
     public synchronized int sayGoodbye(int studentID) 
     {
-        System.out.printf("saying goodbye to student %d\n", studentID);
+        //System.out.printf("saying goodbye to student %d\n", studentID);
         clientsGoodbye[studentID] = true;
         notifyAll();
         numberOfStudentsInRestaurant--;

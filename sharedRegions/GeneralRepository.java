@@ -64,11 +64,13 @@ public class GeneralRepository {
      *
      *     @param logFileName name of the logging file
      */
-    public GeneralRepository(String logFileName){
+    public GeneralRepository(String logFileName)
+    {
         this.logFileName = logFileName;
         chefState = ChefStates.WAFOR;
         waiterState = WaiterStates.APPST;
-        for(int i = 0; i < Constants.N; i++){
+        for(int i = 0; i < Constants.N; i++)
+        {
             studentState[i] = StudentStates.GGTRT;
         }
 
@@ -77,8 +79,8 @@ public class GeneralRepository {
         } catch (MemException e) {
             e.printStackTrace();
         }
-        numberOfCourse=0;
-        numberOfPortion=0;
+        numberOfCourse = 0;
+        numberOfPortion = 0;
 
         reportInitialStatus();
     }
@@ -88,16 +90,19 @@ public class GeneralRepository {
      *
      *  
      */
-    private void reportInitialStatus() {
+    private void reportInitialStatus() 
+    {
         TextFile log = new TextFile();
-        if (!log.openForWriting (".", logFileName)){
+        if (!log.openForWriting (".", logFileName))
+        {
             GenericIO.writelnString ("The operation of creating the file " + logFileName + " failed!");
             System.exit(1);
         }
-        log.writelnString ("The Restaurant - Description of the internal state");
+        log.writelnString ("\t\t\t\t\t\t\t\t\t\t\t\tThe Restaurant - Description of the internal state\n");
         log.writelnString (" Chef   Waiter  Stu0  Stu1    Stu2   Stu3   Stu4   Stu5  Stu6    NCourse   NPortion                     Table       ");
         log.writelnString ("State   State  State  State  State  State  State  State  State                        Seat0 Seat1 Seat2 Seat3 Seat4 Seat5 Seat6");
-        if (!log.close()){
+        if (!log.close())
+        {
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }
@@ -109,7 +114,8 @@ public class GeneralRepository {
     *
     *     @param studentID integer
     */
-    public synchronized void updateStudentsInTableQueue(int studentID){
+    public synchronized void updateStudentsInTableQueue(int studentID)
+    {
         try {
             studentsInTableQueue.write(studentID);
         } catch (MemException e) {
@@ -125,16 +131,17 @@ public class GeneralRepository {
     public synchronized void setChefState (int state)
     {
 	  
-        switch(state) {
+        switch(state) 
+        {
             case 0: //WAFOR
                 break;
             case 1: //PRPCS
-                numberOfCourse++;
+                numberOfCourse += 1;
+                numberOfPortion = 0;
                 break;
             case 2: //DSHPT
                 break;
             case 3: //DLVPT
-                if(numberOfPortion==Constants.N) numberOfPortion=0; else numberOfPortion++;
                 break;
             case 4: //CLSSV
                 break;
@@ -150,22 +157,6 @@ public class GeneralRepository {
     */
     public synchronized void setWaiterState (int state)
     {
-        switch(state) {
-            case 0: //APPST
-                break;
-            case 1: //PRSMN
-                break;
-            case 2: //TKODR
-                break;
-            case 3: //PCODR
-                break;
-            case 4: //WTFPT
-                break;
-            case 5: //PRCBL
-                break;
-            case 6: //RECPM
-                break;
-        }
         waiterState = state;
         reportStatus();
    }
@@ -175,13 +166,14 @@ public class GeneralRepository {
     *
     *     @param state student state
     */
-   public synchronized void setStudentState (int studenID,int state)
+   public synchronized void setStudentState (int studentID, int state)
     {
-	    switch(state) {
+	    switch(state) 
+        {
             case 0: //GGTRT
                 break;
             case 1: //TKSTT
-                updateStudentsInTableQueue(studenID);
+                updateStudentsInTableQueue(studentID);
                 break;
             case 2: //SELCS
                 break;
@@ -196,7 +188,7 @@ public class GeneralRepository {
             case 7: //GGHOM
                 break;
 	    }
-        studentState[studenID] = state;
+        studentState[studentID] = state;
         reportStatus();
    }
 
@@ -228,30 +220,34 @@ public class GeneralRepository {
      *  The current state of entities is organized in a line to be printed.
      * 
      */
-    private void reportStatus() {
+    private void reportStatus() 
+    {
         TextFile log = new TextFile ();                      // instantiation of a text file handler
 
         String lineStatus = "";                              // state line to be printed
 
-        if (!log.openForAppending (".", logFileName)){ 
+        if (!log.openForAppending (".", logFileName))
+        { 
             GenericIO.writelnString ("The operation of opening for appending the file " + logFileName + " failed!");
             System.exit (1);
         }
 
-        switch (chefState){
-            case 0: lineStatus += " WAFOR ";
+        switch (chefState)
+        {
+            case 0: lineStatus += "WAFOR  ";
                                                 break;
-            case 1: lineStatus += " PRPCS ";
+            case 1: lineStatus += "PRPCS  ";
                                                 break;
-            case 2: lineStatus += " DSHPT ";
+            case 2: lineStatus += "DSHPT  ";
                                                 break;
-            case 3: lineStatus += " DLVPT ";
+            case 3: lineStatus += "DLVPT  ";
                                                 break;
-            case 4: lineStatus += " CLSSV ";
+            case 4: lineStatus += "CLSSV  ";
                                                 break;
         }
    
-        switch (waiterState){
+        switch (waiterState)
+        {
             case 0: lineStatus += " APPST ";
                                                 break;
             case 1: lineStatus += " PRSMN ";
@@ -269,7 +265,8 @@ public class GeneralRepository {
         }
    
         for (int i = 0; i < Constants.N; i++)
-            switch (studentState[i]){
+            switch (studentState[i])
+            {
                 case 0:  lineStatus += " GGTRT ";
                                                 break;
                 case 1:  lineStatus += " TKSTT ";
@@ -291,9 +288,11 @@ public class GeneralRepository {
         lineStatus += " "+String.format("%7d", numberOfCourse)+"  "+String.format("%7d", numberOfPortion);
 
         try {
-            if(!studentsInTableQueue.empty){
+            if(!studentsInTableQueue.empty)
+            {
                 int id = studentsInTableQueue.read();
-                for (int i = 0; i < k; i++){
+                for (int i = 0; i < k; i++)
+                {
                     lineStatus += String.format("\t");
                 }
                 lineStatus += String.format("\t %5d ",id);
@@ -304,7 +303,8 @@ public class GeneralRepository {
         }
     
         log.writelnString (lineStatus);
-        if (!log.close ()){ 
+        if (!log.close ())
+        { 
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }
@@ -314,20 +314,29 @@ public class GeneralRepository {
     *   Write to the logging file if operation of opening for appending the file or operation of closing the file failed.
     *
     */
-    public void printSumUp() {
+    public void printSumUp() 
+    {
         TextFile log = new TextFile ();  
 
         if (!log.openForAppending (".", logFileName))
-            { GenericIO.writelnString ("The operation of opening for appending the file " + logFileName + " failed!");
-                System.exit (1);
-            }
+        { 
+            GenericIO.writelnString ("The operation of opening for appending the file " + logFileName + " failed!");
+            System.exit(1);
+        }
+        
+        log.writelnString("\n\n\nLegend: \n" +
+        "Chef State - state of the chef: WAFOR PRPCS DSHPT DLVPT CLSSV\n" +
+        "Waiter State - state of the waiter: APPST PRSMN TKODR PCODR WTFPT PRCBL RECPM\n" +
+        "Stu# State - state of the student #: GGTRT TKSTT SELCS OGODR CHTWC EJYML PYTBL GGHOM\n" +
+        "NCourse - number of the course: 0 upto M\n" +
+        "NPortion - number of the portion of a course: 0 upto N\n" +
+        "Table Seat# - id of the student sat at that chair\n");
         
         if (!log.close ())
         { 
             GenericIO.writelnString ("The operation of closing the file " + logFileName + " failed!");
             System.exit (1);
         }
+        
     }
-
-    
 }

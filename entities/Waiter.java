@@ -1,5 +1,5 @@
 package entities;
-import libraries.Request;
+import commInfra.Request;
 import sharedRegions.*;
 
 /**

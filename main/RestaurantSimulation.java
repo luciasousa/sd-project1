@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Scanner;
+
 import entities.*;
 import sharedRegions.*;
 
@@ -7,7 +9,12 @@ public class RestaurantSimulation
 {
     public static void main(String [] args)
     {
-        for(int sim = 0; sim < 1; sim++){
+        Scanner sc = new Scanner(System.in);
+        System.out.printf("How many runs?: ");
+        int numSims =  Integer.parseInt(sc.next());
+        sc.close();
+        for(int sim = 0; sim < numSims; sim++)
+        {
             //instantiate entities
             Chef chef;
             Waiter waiter;
@@ -35,8 +42,7 @@ public class RestaurantSimulation
             /* start of the simulation */
             chef.start();
             waiter.start();
-            for (int i = 0; i < Constants.N; i++)
-                student[i].start();
+            for (int i = 0; i < Constants.N; i++) student[i].start();
 
             /* waiting for the end of the simulation */
             for (int i = 0; i < Constants.N; i++)

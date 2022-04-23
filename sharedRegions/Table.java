@@ -114,7 +114,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
+        //System.out.printf("student %d take a seat, state: %d\n", student.getStudentID(),student.getStudentState());
 
         while(!clientsSaluted[student.getStudentID()]) 
         {
@@ -139,7 +139,7 @@ public class Table
         waiter.setWaiterState(WaiterStates.PRSMN);
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
-        System.out.printf("waiter salute the client %d, state: %d\n", studentID, waiter.getWaiterState());
+        //System.out.printf("waiter salute the client %d, state: %d\n", studentID, waiter.getWaiterState());
         clientsSaluted[studentID] = true;
         notifyAll();
         while(!menuRead[studentID])
@@ -165,7 +165,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d read menu, state: %d\n", studentID, student.getStudentState());
+        //System.out.printf("student %d read menu, state: %d\n", studentID, student.getStudentState());
         menuRead[studentID] = true;
         //signal waiter that menu was read
         notifyAll();
@@ -185,7 +185,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d prepare the order, state: %d\n", student.getStudentID(), student.getStudentState());
+        //System.out.printf("student %d prepare the order, state: %d\n", student.getStudentID(), student.getStudentState());
         while (!wasInformed) 
         {    
             try {
@@ -210,7 +210,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d inform companion, state: %d\n", student.getStudentID(), student.getStudentState());
+        //System.out.printf("student %d inform companion, state: %d\n", student.getStudentID(), student.getStudentState());
         wasInformed = true;
         numberOfStudentsRequests += 1;
         notifyAll();
@@ -238,7 +238,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d has been informed\n", student.getStudentID());
+        //System.out.printf("student %d has been informed\n", student.getStudentID());
         while(!wasInformed)
         {
             try {
@@ -266,7 +266,7 @@ public class Table
                 e.printStackTrace();
             }
         }
-        System.out.println("waiter has the pad");
+        //System.out.println("waiter has the pad");
     }
 
     /**
@@ -282,7 +282,7 @@ public class Table
         waiter.setWaiterState(WaiterStates.TKODR);
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
-        System.out.printf("waiter get the pad, state: %d\n", waiter.getWaiterState());
+        //System.out.printf("waiter get the pad, state: %d\n", waiter.getWaiterState());
         waiterHasThePad = true;
         notifyAll(); 
         while(!orderDescribed)
@@ -304,7 +304,7 @@ public class Table
      */
     public synchronized void describeTheOrder() 
     {
-        System.out.println("order is described");
+        //System.out.println("order is described");
         orderDescribed = true;
         notifyAll();
     }
@@ -318,7 +318,7 @@ public class Table
      */
     public synchronized boolean hasEverybodyChosen() 
     {
-        System.out.printf("pedidos dos estudantes = %d\n", numberOfStudentsRequests);
+        //System.out.printf("pedidos dos estudantes = %d\n", numberOfStudentsRequests);
         if (numberOfStudentsRequests == Constants.N) return true; else return false;
     }
 
@@ -336,7 +336,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.println("first student has joined the talk");
+        //System.out.println("first student has joined the talk");
         while(!courseReady[numberOfCoursesDelivered])
         {
             try {
@@ -358,13 +358,13 @@ public class Table
     public synchronized void deliverPortion() 
     {
         numberOfPortionsEaten = 0;
-        repos.setNumberOfPortions(numberOfPortionsDelivered);
         numberOfPortionsDelivered += 1;
+        repos.setNumberOfPortions(numberOfPortionsDelivered);
         hasEndedEating = false;
-        System.out.printf("waiter is delivering the portion %d\n", numberOfPortionsDelivered);
+        //System.out.printf("waiter is delivering the portion %d\n", numberOfPortionsDelivered);
         if(numberOfPortionsDelivered == Constants.N)
         {
-            System.out.printf("course nº %d finished\n", numberOfCoursesDelivered);
+            //System.out.printf("course nº %d finished\n", numberOfCoursesDelivered);
             courseReady[numberOfCoursesDelivered] = true;
             notifyAll();
             if(numberOfCoursesDelivered == Constants.M - 1) coursesCompleted = true;
@@ -378,8 +378,9 @@ public class Table
             }
             
             numberOfPortionsDelivered = 0;
-            repos.setNumberOfCourses(numberOfCoursesDelivered);
             if(numberOfCoursesDelivered < Constants.M - 1) numberOfCoursesDelivered += 1;
+            //repos.setNumberOfCourses(numberOfCoursesDelivered);
+            if(!coursesCompleted) repos.setNumberOfPortions(numberOfPortionsDelivered);
         }
     }
 
@@ -408,7 +409,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d has started eating, course: %d\n", student.getStudentID(), numberOfCoursesDelivered);
+        ////System.out.printf("student %d has started eating, course: %d\n", student.getStudentID(), numberOfCoursesDelivered);
         try {
             wait((long) (1 + 500 * Math.random ()));
         } catch (InterruptedException e) {
@@ -430,7 +431,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d has finished eating\n", student.getStudentID());
+        ////System.out.printf("student %d has finished eating\n", student.getStudentID());
     }
 
     /**
@@ -449,7 +450,7 @@ public class Table
             hasEndedEating = true;
             notifyAll();
             courseReady[numberOfCoursesDelivered] = false;
-            System.out.printf("Courses Completed: %b\n",coursesCompleted);
+            //System.out.printf("Courses Completed: %b\n",coursesCompleted);
             while(!(courseReady[numberOfCoursesDelivered] || coursesCompleted))
             {
                 try {
@@ -473,7 +474,7 @@ public class Table
     {
         Student student = (Student) Thread.currentThread();
         int studentID = student.getStudentID();
-        System.out.printf("Student %d is waiting for payment\n", studentID);
+        //System.out.printf("Student %d is waiting for payment\n", studentID);
         while(!studentHasPaid)
         {
             try {
@@ -498,7 +499,7 @@ public class Table
         waiter.setWaiterState(WaiterStates.RECPM);
         int state = waiter.getWaiterState();
         repos.setWaiterState(state);
-        System.out.println("presenting the bill");
+        //System.out.println("presenting the bill");
         billReady = true;
         notifyAll();
         while(!studentHasPaid)
@@ -525,7 +526,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        System.out.printf("student %d should have arrived earlier, pay the bill\n",studentID);
+        //System.out.printf("student %d should have arrived earlier, pay the bill\n",studentID);
         while(!billReady)
         {
             try {
@@ -545,7 +546,7 @@ public class Table
      */
     public synchronized void honourTheBill() 
     {
-        System.out.println("bill has been honoured");
+        //System.out.println("bill has been honoured");
         studentHasPaid = true;
         notifyAll();
     }
