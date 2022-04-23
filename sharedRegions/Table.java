@@ -380,8 +380,8 @@ public class Table
             
             numberOfPortionsDelivered = 0;
             if(numberOfCoursesDelivered < Constants.M - 1) numberOfCoursesDelivered += 1;
-            repos.setNumberOfPortionsAndCourses(numberOfPortionsDelivered, numberOfCoursesDelivered);
-            if(coursesCompleted) repos.setNumberOfCourses(numberOfCoursesDelivered + 1);
+            if(coursesCompleted) repos.setNumberOfPortionsAndCourses(numberOfPortionsDelivered, numberOfCoursesDelivered + 1);
+            else repos.setNumberOfPortionsAndCourses(numberOfPortionsDelivered, numberOfCoursesDelivered);
         }
     }
 
