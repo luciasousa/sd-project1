@@ -2,13 +2,42 @@ package entities;
 import main.Constants;
 import sharedRegions.*;
 
+/**
+ *   Student thread.
+ *
+ *   Used to simulate the student life cycle.
+ *   Static solution.
+ */
 public class Student extends Thread 
 {
+    /**
+     *  Student identification.
+     */
     private int studentID;
+
+    /**
+     *  Student State.
+     */
     private int studentState;
+
+    /**
+     *  Reference to the table.
+     */
     private final Table table;
+
+    /**
+     *  Reference to the bar.
+     */
     private final Bar bar;
 
+    /**
+     *   Instantiation of a student thread.
+     *
+     *     @param studentID student id
+     *     @param studentState student state
+     *     @param tabel reference to table
+     *     @param bar reference to the bar
+     */
     public Student(int studentID,int studentState, Table table, Bar bar)
     {
         this.studentID = studentID;
@@ -17,23 +46,49 @@ public class Student extends Thread
         this.bar=bar;
     }
 
+    /**
+     *   Set student id.
+     *
+     *     @param id student id
+     */
     public void setStudentID(int id){
         studentID = id;
     }
 
+    /**
+     *   Get student id.
+     *  
+     *   @return stduent id
+     */
     public int getStudentID(){
         return studentID;
     }
 
+    /**
+     *   Set student state.
+     *
+     *     @param state student state
+     */
     public void setStudentState(int state){
         studentState = state;
     }
 
+    /**
+     *   Get student state.
+     *
+     *   @return student state
+     */
     public int getStudentState(){
         return studentState;
     }
 
-    //function run - thread
+    /**
+     *   Life cycle of the student.
+     *   
+     *   Starts at the state going to the restaurant 
+     *   Ends when the student exits the restaurant
+     * 
+     */
     public void run() 
     {
         System.out.println("student thread");
@@ -78,9 +133,6 @@ public class Student extends Thread
      *  Internal operation.
      */
     private void walkABit() {
-        //estudantes vão chegando ao restaurante aleatoriamente
-        //estudantes estão no primeiro estado bloqueados
-        //estudante fica sleep durante período random
         try { 
             Thread.sleep ((long) (1 + 40 * Math.random ()));
         }

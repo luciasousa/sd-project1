@@ -14,14 +14,46 @@ import main.Constants;
 
 public class Kitchen 
 {
+    /**
+     *   Counter of the number of courses to deliver.
+     */
     private int numberOfCoursesToDeliver;
+
+    /**
+     *   Counter of the number of portions to deliver.
+     */
     private int numberOfPortionsToDeliver;
+
+    /**
+     *   Reference to the general repository
+     */
     private final GeneralRepository repos;
+
+    /**
+     *   Boolean flag that indicates if is the first course.
+     */
     private boolean firstCourse;
+
+    /**
+     *   Boolean flag that indicates if note is available.
+     */
     private boolean isNoteAvailable = false;
+
+    /**
+     *   Boolean flag that indicates if preperation was started.
+     */
     private boolean preparationStarted;
+
+    /**
+     *   Boolean flag that indicates if portion was collected.
+     */
     private boolean portionCollected;
 
+    /**
+     *  Kitchen instantiation.
+     *
+     *    @param repos reference to the General Information Repository
+     */
     public Kitchen(GeneralRepository repos)
     {
         firstCourse = true;
@@ -180,6 +212,7 @@ public class Kitchen
      *
      *    Called by the chef to check if all portions were delivered
      *    
+     *    @return boolean
      */
     public synchronized boolean haveAllPortionsBeenDelivered() 
     {
@@ -191,6 +224,7 @@ public class Kitchen
      *
      *    Called by the chef to check if the order was completed
      *    
+     *    @return boolean
      */
     public synchronized boolean hasTheOrderBeenCompleted() 
     {

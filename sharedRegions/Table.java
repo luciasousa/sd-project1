@@ -14,22 +14,86 @@ import entities.*;
 
 public class Table 
 {
+    /**
+     *   Counter of the number of portions delivered.
+     */
     private int numberOfPortionsDelivered;
+
+    /**
+     *   Counter of the number of courses delivered.
+     */
     private int numberOfCoursesDelivered;
+
+    /**
+     *   Counter of the number of portions eaten.
+     */
     private int numberOfPortionsEaten;
+
+    /**
+     *   Counter of the number of students requests.
+     */
     private int numberOfStudentsRequests = 1;
+
+    /**
+     *   Reference to the general repository.
+     */
     private final GeneralRepository repos;
+
+    /**
+     *   Array of booleans that indicates if student read the menu.
+     */
     private boolean[] menuRead;
+
+    /**
+     *   Boolean flag that indicates if was informed.
+     */
     private boolean wasInformed = false;
+
+    /**
+     *   Boolean flag that indicates if waiter has the pad.
+     */
     private boolean waiterHasThePad = false;
+
+    /**
+     *   Boolean flag that indicates if student has paid.
+     */
     private boolean studentHasPaid = false;
+
+    /**
+     *   Array of booleans that indicates if clients were saluted.
+     */
     private boolean[] clientsSaluted;
+
+    /**
+     *   Boolean flag that indicates if ordr was described.
+     */
     private boolean orderDescribed;
+
+    /**
+     *   Array of booleans that indicates if course is ready.
+     */
     private boolean []courseReady;
+
+    /**
+     *   Boolean flag that indicates if bill is ready.
+     */
     private boolean billReady = false;
+
+    /**
+     *   Boolean flag that indicates if student has end eating.
+     */
     private boolean hasEndedEating;
+
+    /**
+     *   Boolean flag that indicates if courses are complete.
+     */
     private boolean coursesCompleted;
 
+    /**
+     *  Table instantiation.
+     *
+     *    @param repos reference to the General Information Repository
+     */
     public Table(GeneralRepository repos)
     {
         this.repos = repos;
@@ -249,6 +313,7 @@ public class Table
      *    Operation has everybody chosen
      *
      *    Called by the first student to arrive to check if every companion has chosen
+     *    @return boolean
      * 
      */
     public synchronized boolean hasEverybodyChosen() 
@@ -322,7 +387,7 @@ public class Table
      *    Operation have all clients been served
      *
      *    Called by the waiter to check if all clients have been served
-     * 
+     *    @return boolean
      */
     public boolean haveAllClientsBeenServed() 
     {
@@ -375,6 +440,7 @@ public class Table
      *    signals waiter that everybody finished eating
      *    waits for next course to be ready
      * 
+     *    @return boolean
      */
     public synchronized boolean hasEverybodyFinished() 
     {

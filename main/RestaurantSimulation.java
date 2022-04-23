@@ -7,7 +7,7 @@ public class RestaurantSimulation
 {
     public static void main(String [] args)
     {
-        for(int sim = 0; sim < 10; sim++){
+        for(int sim = 0; sim < 1; sim++){
             //instantiate entities
             Chef chef;
             Waiter waiter;

@@ -22,26 +22,48 @@ import genclass.TextFile;
 
 public class GeneralRepository {
 
-    //name of the logging file
+    /**
+     *  Name of the logging file.
+     */
     private final String logFileName;
 
-    //state of the chef
+    /**
+     *  State of the chef.
+     */
     private int chefState;
 
-    //state of the waiter
+    /**
+     *  State of the waiter.
+     */
     private int waiterState;
 
-    //states of the students
+    /**
+     *  States of the students.
+     */
     private int[] studentState = new int[Constants.N];
 
-    //variables needed
-    //private int numberOfStudentsInRestaurant;
-    //with the IDs of the students in order by arrival
+    /**
+     *  FIFO with students at the table.
+     */
     private MemFIFO<Integer> studentsInTableQueue;
+
+    /**
+     *  Counter with the number of course.
+     */
     private int numberOfCourse;
+
+    /**
+     *  Counter with the number of portion.
+     */
     private int numberOfPortion;
+
     private int k = 0;
 
+    /**
+     *   Instantiation of a general repository object.
+     *
+     *     @param logFileName name of the logging file
+     */
     public GeneralRepository(String logFileName){
         this.logFileName = logFileName;
         chefState = ChefStates.WAFOR;
@@ -61,6 +83,11 @@ public class GeneralRepository {
         reportInitialStatus();
     }
 
+    /**
+     *  Write the header and the initial states to the logging file.
+     *
+     *  
+     */
     private void reportInitialStatus() {
         TextFile log = new TextFile();
         if (!log.openForWriting (".", logFileName)){
@@ -77,6 +104,11 @@ public class GeneralRepository {
         reportStatus();
     }
 
+    /**
+    *   Update FIFO updateStudentsInTableQueue
+    *
+    *     @param studentID integer
+    */
     public synchronized void updateStudentsInTableQueue(int studentID){
         try {
             studentsInTableQueue.write(studentID);
@@ -85,6 +117,11 @@ public class GeneralRepository {
         }
     }
 
+    /**
+    *   Set chef state.
+    *
+    *     @param state chef state
+    */
     public synchronized void setChefState (int state)
     {
 	  
@@ -106,6 +143,11 @@ public class GeneralRepository {
         reportStatus();
    }
 
+   /**
+    *   Set waiter state.
+    *
+    *     @param state waiter state
+    */
     public synchronized void setWaiterState (int state)
     {
         switch(state) {
@@ -128,6 +170,11 @@ public class GeneralRepository {
         reportStatus();
    }
 
+   /**
+    *   Set student state.
+    *
+    *     @param state student state
+    */
    public synchronized void setStudentState (int studenID,int state)
     {
 	    switch(state) {
@@ -153,18 +200,34 @@ public class GeneralRepository {
         reportStatus();
    }
 
+   /**
+    *   Update Counter numberOfPortion
+    *
+    *     @param nPortions integer
+    */
     public synchronized void setNumberOfPortions(int nPortions)
     {
         numberOfPortion = nPortions;
         reportStatus();
     }
 
+    /**
+    *   Update Counter numberOfCourse
+    *
+    *     @param nCourses integer
+    */
     public synchronized void setNumberOfCourses(int nCourses)
     {
         numberOfCourse = nCourses;
         reportStatus();
     }
 
+    /**
+     *  Write a state line at the end of the logging file.
+     *
+     *  The current state of entities is organized in a line to be printed.
+     * 
+     */
     private void reportStatus() {
         TextFile log = new TextFile ();                      // instantiation of a text file handler
 
@@ -247,6 +310,10 @@ public class GeneralRepository {
         }
     }
 
+    /**
+    *   Write to the logging file if operation of opening for appending the file or operation of closing the file failed.
+    *
+    */
     public void printSumUp() {
         TextFile log = new TextFile ();  
 

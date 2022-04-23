@@ -17,16 +17,59 @@ import entities.*;
 
 public class Bar 
 {
+
+    /**
+     *   Counter of the number of pending service requests.
+     */
     private int numberOfPendingServiceRequests = 0;
+
+    /**
+     *   FIFO with the pending service requests.
+     */
     private MemFIFO<Request> pendingServiceRequests;
+
+    /**
+     *   FIFO with the IDs of the students in order of arrival.
+     */
     private MemFIFO<Integer> arrivalQueue;
+
+    /**
+     *   Counter of the number of students in restaurant.
+     */
     private int numberOfStudentsInRestaurant;
+
+    /**
+     *   Reference to the table.
+     */
     private Table table;
+
+    /**
+     *   Reference to the kitchen.
+     */
     private Kitchen kitchen;
+
+    /**
+     *   Reference to the general repository.
+     */
     private final GeneralRepository repos;
+
+    /**
+     *   Array with the IDs of the students in order of arrival.
+     */
     private int[] studentsArrival;
+
+    /**
+     *   Array of booleans that indicates if waiter said goodbye to student.
+     */
     private boolean[] clientsGoodbye;
 
+    /**
+     *  Table instantiation.
+     *
+     *    @param repos reference to the General Information Repository
+     *    @param table reference to the table
+     *    @param kitchen reference to the kitchen
+     */
     public Bar(GeneralRepository repos, Table table, Kitchen kitchen)
     {
         try {
@@ -300,6 +343,9 @@ public class Bar
      *
      *    Called by the waiter to say goodbye to the student
      *    signals student that waiter said goodbye
+     * 
+     *    @param studentID student id
+     *    @return number of students in restuarant
      *    
      */
     public synchronized int sayGoodbye(int studentID) 

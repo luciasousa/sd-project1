@@ -1,27 +1,46 @@
 package entities;
 
+/**
+ *    Definition of the internal states of the student during his life cycle.
+ */
 public class StudentStates {
-    //initial state going to the restaurant
+    /**
+     *    The student is going to the restaurant.
+     */
     public static int GGTRT = 0;
 
-    //state taking a seat at the table
+    /**
+     *    The student is taking a seat at the table.
+     */
     public static int TKSTT = 1;
 
-    //state selecting courses
+    /**
+     *    The student is selecting courses.
+     */
     public static int SELCS = 2;
 
-    //state organizing the order
+    /**
+     *    The student is organizing the order.
+     */
     public static int OGODR = 3;
 
-    //state chatting with companions
+    /**
+     *    The student is chatting with companions.
+     */
     public static int CHTWC = 4;
 
-    //state enjoying the meal
+    /**
+     *    The student is enjoying the meal.
+     */
     public static int EJYML = 5;
 
-    //state paying the bill
+    /**
+     *    The student is paying the bill.
+     */
     public static int PYTBL = 6;
 
-    //state going home
+    /**
+     *    The student is going home.
+     */
     public static int GGHOM = 7;
 }
