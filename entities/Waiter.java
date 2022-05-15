@@ -74,7 +74,7 @@ public class Waiter extends Thread
      */
     public void run() 
     {
-        System.out.println("waiter thread");
+        //System.out.println("waiter thread");
         while(true)
         {
             Request r = bar.lookAround();

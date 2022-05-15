@@ -2,6 +2,7 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
         "C:\\Users\\fran_\\Downloads\\genclass.jar",
-        "c:\\Users\\User\\Downloads\\genclass.jar"
+        "c:\\Users\\User\\Downloads\\genclass.jar",
+        "/home/lucia/Downloads/genclass.jar"
     ]
 }

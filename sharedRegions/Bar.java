@@ -111,7 +111,7 @@ public class Bar
             try {
                 wait();
             } catch (Exception e) {
-                //System.out.println("Thread interrupted");
+                System.out.println("Thread interrupted");
             }
         }
         Request request = null;

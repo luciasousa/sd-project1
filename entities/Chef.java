@@ -67,7 +67,7 @@ public class Chef extends Thread
      */
     public void run() 
     {
-        System.out.println("chef thread");
+        //System.out.println("chef thread");
         kitchen.watchTheNews();
         kitchen.startPreparation();
         do 

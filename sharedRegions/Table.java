@@ -206,6 +206,7 @@ public class Table
      */
     public synchronized void informCompanion() 
     {
+        wasInformed = false;
         Student student = ((Student) Thread.currentThread());
         student.setStudentState(StudentStates.CHTWC);
         int studentID = student.getStudentID();
@@ -234,7 +235,6 @@ public class Table
      */
     public synchronized void addUpOnesChoice() 
     {
-        wasInformed = false;
         Student student = (Student) Thread.currentThread();
         int studentID = student.getStudentID();
         int state = student.getStudentState();
@@ -377,7 +377,6 @@ public class Table
                     e.printStackTrace();
                 }
             }
-            
             numberOfPortionsDelivered = 0;
             if(numberOfCoursesDelivered < Constants.M - 1) numberOfCoursesDelivered += 1;
             if(coursesCompleted) repos.setNumberOfPortionsAndCourses(numberOfPortionsDelivered, numberOfCoursesDelivered + 1);
@@ -410,7 +409,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        ////System.out.printf("student %d has started eating, course: %d\n", student.getStudentID(), numberOfCoursesDelivered);
+        //System.out.printf("student %d has started eating, course: %d\n", student.getStudentID(), numberOfCoursesDelivered);
         try {
             wait((long) (1 + 500 * Math.random ()));
         } catch (InterruptedException e) {
@@ -432,7 +431,7 @@ public class Table
         int studentID = student.getStudentID();
         int state = student.getStudentState();
         repos.setStudentState(studentID, state);
-        ////System.out.printf("student %d has finished eating\n", student.getStudentID());
+        //System.out.printf("student %d has finished eating\n", student.getStudentID());
     }
 
     /**
@@ -451,17 +450,32 @@ public class Table
             hasEndedEating = true;
             notifyAll();
             courseReady[numberOfCoursesDelivered] = false;
-            //System.out.printf("Courses Completed: %b\n",coursesCompleted);
-            while(!(courseReady[numberOfCoursesDelivered] || coursesCompleted))
-            {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
             return true; 
         } else return false;
+    }
+
+    public synchronized void waitForEverybodyToFinish(){
+        
+        while(!hasEndedEating)
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public synchronized void waitForCourseToBeReady(){
+        
+        while(!(courseReady[numberOfCoursesDelivered] || coursesCompleted))
+        {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
