@@ -35,7 +35,7 @@ public class Student extends Thread
      *
      *     @param studentID student id
      *     @param studentState student state
-     *     @param tabel reference to table
+     *     @param table reference to table
      *     @param bar reference to the bar
      */
     public Student(int studentID,int studentState, Table table, Bar bar)

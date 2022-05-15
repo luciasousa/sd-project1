@@ -1,7 +1,4 @@
 package sharedRegions;
-
-import commInfra.MemException;
-import commInfra.MemFIFO;
 import entities.ChefStates;
 import entities.StudentStates;
 import entities.WaiterStates;

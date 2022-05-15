@@ -454,6 +454,11 @@ public class Table
         } else return false;
     }
 
+    /**
+     *    Operation wait For Everybody To Finish
+     *
+     *    Called by the student to wait for the rest of the students to end eating.
+     */
     public synchronized void waitForEverybodyToFinish(){
         
         while(!hasEndedEating)
@@ -466,6 +471,11 @@ public class Table
         }
     }
 
+    /**
+     *    Operation wait For Course To Be Ready
+     *
+     *    Called by the student to wait for next course.
+     */
     public synchronized void waitForCourseToBeReady(){
         
         while(!(courseReady[numberOfCoursesDelivered] || coursesCompleted))

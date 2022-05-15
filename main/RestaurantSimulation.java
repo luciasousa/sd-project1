@@ -1,5 +1,4 @@
 package main;
-import java.util.Scanner;
 import entities.*;
 import sharedRegions.*;
 

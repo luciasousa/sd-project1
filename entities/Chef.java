@@ -30,7 +30,7 @@ public class Chef extends Thread
      *
      *     @param chefState state of the chef
      *     @param kitchen reference to the kitchen
-     *     @param ber reference to the bar
+     *     @param bar reference to the bar
      */
     public Chef(int chefState, Kitchen kitchen, Bar bar)
     {
